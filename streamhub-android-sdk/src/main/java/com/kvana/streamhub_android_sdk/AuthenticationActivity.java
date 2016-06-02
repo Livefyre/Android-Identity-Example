@@ -1,37 +1,31 @@
 package com.kvana.streamhub_android_sdk;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.kvana.streamhub_android_sdk.network.RetrofitHandler;
+import com.kvana.streamhub_android_sdk.util.Constant;
+import com.kvana.streamhub_android_sdk.util.Util;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class AuthenticationActivity extends BaseActivity {
 
     private class LoginWebViewClient extends WebViewClient {
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            showProgressDialog();
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-            dismissProgressDialog();
-        }
-
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading() called with: " + " url = [" + url + "]");
             if (url.contains("AuthCanceled")) {
                 cancelResult();
             } else if (url.contains("jwtProfileToken=")) {
-                sendResult(url.split("\\?")[1].split("&")[0].split("=")[1]);
+                adminClient(url.split("\\?")[1].split("&")[0].split("=")[1]);
             } else if (url.contains("lftoken")) {
-                sendResult(url.split("#")[1].split(":")[1]);
+                adminClient(url.split("#")[1].split(":")[1]);
             } else {
                 webview.loadUrl(url);
             }
@@ -52,7 +46,7 @@ public class AuthenticationActivity extends BaseActivity {
 
         webview = (WebView) findViewById(R.id.webview);
         //removing all previous cookies
-        CookieManager.getInstance().removeAllCookie();
+//        CookieManager.getInstance().removeAllCookie();
         //TODO : remove single cookie
 
         webview.getSettings().setJavaScriptEnabled(true);
@@ -81,4 +75,29 @@ public class AuthenticationActivity extends BaseActivity {
         super.onBackPressed();
         cancelResult();
     }
+
+    private void adminClient(String lfToken) {
+        RetrofitHandler.getInstance().adminClient(
+                Util.stringToBase64(Constant.ARTICLE_ID),
+                lfToken,
+                Constant.SITE_ID).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccess()) {
+                    Log.d(TAG, "adminClient-onResponse: " + response.body());
+                    sendResult(response.body());
+                } else {
+                    cancelResult();
+                    Log.e(TAG, "adminClient-onResponse: " + response.raw());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                cancelResult();
+                Log.e(TAG, "adminClient-onFailure: " + t.getLocalizedMessage());
+            }
+        });
+    }
+
 }

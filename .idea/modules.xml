@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LivefyreAndroidSdk.iml" filepath="$PROJECT_DIR$/LivefyreAndroidSdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/livefyre-android-sdk.iml" filepath="$PROJECT_DIR$/livefyre-android-sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" filepath="$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" />
     </modules>
   </component>
