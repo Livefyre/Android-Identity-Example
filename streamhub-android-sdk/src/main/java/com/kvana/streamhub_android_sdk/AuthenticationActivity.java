@@ -35,7 +35,9 @@ public class AuthenticationActivity extends BaseActivity {
 
     private static final String TAG = AuthenticationActivity.class.getName();
     private WebView webview;
+    //    private String URL = "https://identity.qa-ext.livefyre.com/qa-blank.fyre.co/pages/auth/engage/?app=https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co&next=aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s";
     private String URL = "https://identity.qa-ext.livefyre.com/qa-blank.fyre.co/pages/auth/engage/?app=https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co&next=aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s";
+
     public static String DATA = "data";
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
 
