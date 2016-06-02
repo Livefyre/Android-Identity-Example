@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (resultCode == RESULT_OK) {
             if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
                 //you can receive token here with key - TOKEN
-                token_tv.setText(data.getStringExtra(AuthenticationActivity.TOKEN));
+                token_tv.setText(data.getStringExtra(AuthenticationActivity.DATA));
             }
         }
     }
