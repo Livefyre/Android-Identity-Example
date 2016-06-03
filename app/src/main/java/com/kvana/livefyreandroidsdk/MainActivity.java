@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
-                sign_in_btn.setVisibility(View.GONE);
                 //you can receive token here with key - TOKEN
                 try {
                     JSONObject jsonObject = new JSONObject(data.getStringExtra(AuthenticationActivity.DATA));

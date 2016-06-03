@@ -19,4 +19,14 @@ public class Util {
         return base64.trim();
     }
 
+    public static String base64ToString(String base64) {
+        String text = null;
+        byte[] data = Base64.decode(base64, Base64.DEFAULT);
+        try {
+            text = new String(data, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return text;
+    }
 }

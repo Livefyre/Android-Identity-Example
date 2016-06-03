@@ -3,6 +3,7 @@ package com.kvana.streamhub_android_sdk;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -11,6 +12,9 @@ import com.kvana.streamhub_android_sdk.network.RetrofitHandler;
 import com.kvana.streamhub_android_sdk.util.Constant;
 import com.kvana.streamhub_android_sdk.util.Util;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,6 +22,7 @@ import retrofit2.Response;
 public class AuthenticationActivity extends BaseActivity {
 
     private class LoginWebViewClient extends WebViewClient {
+
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading() called with: " + " url = [" + url + "]");
             if (url.contains("AuthCanceled")) {
@@ -26,6 +31,8 @@ public class AuthenticationActivity extends BaseActivity {
                 adminClient(url.split("\\?")[1].split("&")[0].split("=")[1]);
             } else if (url.contains("lftoken")) {
                 adminClient(url.split("#")[1].split(":")[1]);
+            } else if (url.equals("http://livefyre-cdn-dev.s3.amazonaws.com/demos/lfep2-comments.html")) {
+                getCookie(CookieManager.getInstance(), URL);
             } else {
                 webview.loadUrl(url);
             }
@@ -50,7 +57,7 @@ public class AuthenticationActivity extends BaseActivity {
         //removing all previous cookies
 //        CookieManager.getInstance().removeAllCookie();
         //TODO : remove single cookie
-
+//        CookieManager.getInstance().setAcceptCookie(true);
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         webview.setWebChromeClient(new WebChromeClient());
@@ -102,4 +109,15 @@ public class AuthenticationActivity extends BaseActivity {
         });
     }
 
+    public void getCookie(CookieManager cookieManager, String siteName) {
+        String cookies = cookieManager.getCookie(siteName);
+        String token = cookies.split(";")[2];
+        token = token.substring(token.indexOf("=")+2, token.length());
+        try {
+            JSONObject jsonObject = new JSONObject(Util.base64ToString(token));
+            adminClient(jsonObject.optString("token"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }
