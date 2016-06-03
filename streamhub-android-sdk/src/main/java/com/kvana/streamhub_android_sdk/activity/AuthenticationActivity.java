@@ -8,7 +8,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.kvana.streamhub_android_sdk.BaseActivity;
 import com.kvana.streamhub_android_sdk.R;
 import com.kvana.streamhub_android_sdk.network.RetrofitHandler;
 import com.kvana.streamhub_android_sdk.util.Constant;
