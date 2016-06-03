@@ -13,18 +13,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by Hari on 02/06/16.
  */
-public class RetrofitHandler {
+public class LfNetworkClient {
     final OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .readTimeout(3, TimeUnit.MINUTES)
             .connectTimeout(3, TimeUnit.MINUTES)
             .build();
-    private static RetrofitHandler ourInstance = new RetrofitHandler();
+    private static LfNetworkClient ourInstance = new LfNetworkClient();
 
-    public static RetrofitHandler getInstance() {
+    public static LfNetworkClient getInstance() {
         return ourInstance;
     }
 
-    private RetrofitHandler() {
+    private LfNetworkClient() {
     }
 
     private Retrofit lfRetrofit = new Retrofit.Builder()

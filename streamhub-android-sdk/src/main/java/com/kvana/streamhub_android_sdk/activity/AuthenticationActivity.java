@@ -9,7 +9,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.kvana.streamhub_android_sdk.network.RetrofitHandler;
+import com.kvana.streamhub_android_sdk.network.LfNetworkClient;
 import com.kvana.streamhub_android_sdk.util.Constant;
 import com.kvana.streamhub_android_sdk.util.Util;
 
@@ -87,7 +87,7 @@ public class AuthenticationActivity extends BaseActivity {
     }
 
     private void adminClient(String lfToken) {
-        RetrofitHandler.getInstance().adminClient(
+        LfNetworkClient.getInstance().adminClient(
                 Util.stringToBase64(Constant.ARTICLE_ID),
                 lfToken,
                 Constant.SITE_ID).enqueue(new Callback<String>() {
