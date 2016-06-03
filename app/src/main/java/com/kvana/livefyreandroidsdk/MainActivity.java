@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.kvana.streamhub_android_sdk.AuthenticationActivity;
+import com.kvana.streamhub_android_sdk.activity.AuthenticationActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
