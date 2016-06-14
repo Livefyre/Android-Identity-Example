@@ -1,7 +1,7 @@
 package com.livefyre.comments;
 
 public class LFSConfig {
-    public static String COLLECTION_ID = "47466506";//84194121
+    public static String COLLECTION_ID = "47466506";//"84194121"
     public static String NETWORK_ID = "qa-blank.fyre.co";//client-solutions.fyre.co
     public static String SITE_ID = "291345";//360354
     public static String ARTICLE_ID = "designer-app-1444956522234";//custom-1402701825509

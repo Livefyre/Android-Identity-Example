@@ -1,9 +1,5 @@
 [
     {
-        "merged": "/Users/kvanadev5/Developer/android/lfr3.1-master/StreamHub-Android-Comments-App/filePickerSDK/build/intermediates/res/merged/release/menu/main.xml",
-        "source": "/Users/kvanadev5/Developer/android/lfr3.1-master/StreamHub-Android-Comments-App/filePickerSDK/src/main/res/menu/main.xml"
-    },
-    {
         "merged": "/Users/kvanadev5/Developer/android/livefyre-android-sdk/filePickerSDK/build/intermediates/res/merged/release/menu/main.xml",
         "source": "/Users/kvanadev5/Developer/android/livefyre-android-sdk/filePickerSDK/src/main/res/menu/main.xml"
     }

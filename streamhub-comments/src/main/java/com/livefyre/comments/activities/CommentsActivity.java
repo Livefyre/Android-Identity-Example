@@ -12,8 +12,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -24,6 +24,7 @@ import com.kvana.streamhub_android_sdk.BootstrapClient;
 import com.kvana.streamhub_android_sdk.StreamClient;
 import com.kvana.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
+import com.livefyre.comments.ContentHandler;
 import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFSConfig;
 import com.livefyre.comments.R;
@@ -31,7 +32,6 @@ import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
-import com.livefyre.comments.ContentHandler;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.squareup.otto.Bus;
@@ -185,10 +185,18 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
         loginTV = (TextView) findViewById(R.id.login_TV);
         loginTV.setOnClickListener(loginListener);
+
+        String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
+
+        if (token == null && token.equals("")) {
+            loginTV.setText("Login");
+        } else {
+            loginTV.setText("Logout");
+        }
+
     }
 
     private void pullViews() {
-
         commentsLV = (RecyclerView) findViewById(R.id.commentsLV);
         commentsLV.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         postNewCommentIv = (ImageButton) findViewById(R.id.postNewCommentIv);
@@ -227,17 +235,20 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
         }
 
         @Override
         public void onSuccess(int statusCode, Header[] headers, JSONObject AdminClintJsonResponseObject) {
             super.onSuccess(statusCode, headers, AdminClintJsonResponseObject);
             dismissProgressDialog();
+            loginTV.setText("Logout");
             JSONObject data;
             application.printLog(true, TAG + "-AdminCallback-onSuccess", AdminClintJsonResponseObject.toString());
             try {
@@ -493,8 +504,14 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     OnClickListener loginListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-            startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+            if (loginTV.getText().equals("Login")) {
+                Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
+                startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+            } else {
+                SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
+                CookieManager.getInstance().removeAllCookie();
+                loginTV.setText("Login");
+            }
         }
     };
 
@@ -509,7 +526,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         }
     }
 
-    //    @Override
     public void onDataUpdate(HashSet<String> authorsSet, HashSet<String> statesSet, HashSet<String> annotationsSet, HashSet<String> updates) {
         application.printLog(true, TAG, "" + statesSet);
         for (String stateBeanId : statesSet) {

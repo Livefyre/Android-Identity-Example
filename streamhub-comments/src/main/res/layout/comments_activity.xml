@@ -21,9 +21,12 @@
                 android:id="@+id/title_TV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:paddingRight="18sp"
                 android:text="LF Login"
-                android:textColor="@color/colorWhite" />
+                android:textColor="@color/colorWhite"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/login_TV"
@@ -31,6 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:paddingRight="16sp"
                 android:text="Login"
                 android:textColor="@color/colorWhite" />
         </RelativeLayout>
