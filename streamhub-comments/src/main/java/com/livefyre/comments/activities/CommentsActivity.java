@@ -318,6 +318,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
             super.onSuccess(statusCode, headers, response);
             application.printLog(false, TAG + "-InitCallback-onSuccess", response.toString());
+
             try {
                 String responseString = response.toString();
                 buildCommentList(responseString);
