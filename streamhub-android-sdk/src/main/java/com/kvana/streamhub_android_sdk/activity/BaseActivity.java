@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk;
+package com.kvana.streamhub_android_sdk.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
