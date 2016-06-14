@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
                 //you can receive token here with key - TOKEN
                 try {
-                    JSONObject jsonObject = new JSONObject(data.getStringExtra(AuthenticationActivity.DATA));
+                    JSONObject jsonObject = new JSONObject(data.getStringExtra(AuthenticationActivity.TOKEN));
                     JSONObject dataJson = jsonObject.optJSONObject("data");
                     JSONObject profileJson = dataJson.optJSONObject("profile");
 
