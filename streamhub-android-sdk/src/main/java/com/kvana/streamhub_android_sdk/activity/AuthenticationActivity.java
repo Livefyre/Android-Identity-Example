@@ -2,7 +2,6 @@ package com.kvana.streamhub_android_sdk.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -19,15 +18,11 @@ public class AuthenticationActivity extends BaseActivity {
     private class LoginWebViewClient extends WebViewClient {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.d(TAG, "shouldOverrideUrlLoading() called with: " + " url = [" + url + "]");
+            String cookies = CookieManager.getInstance().getCookie(URL);
             if (url.contains("AuthCanceled")) {
                 cancelResult();
-            } else if (url.contains("jwtProfileToken=")) {
-                sendResult(url.split("\\?")[1].split("&")[0].split("=")[1]);
-            } else if (url.contains("lftoken")) {
-                sendResult(url.split("#")[1].split(":")[1]);
-            } else if (url.equals("http://livefyre-cdn-dev.s3.amazonaws.com/demos/lfep2-comments.html")) {
-                getCookie(CookieManager.getInstance(), URL);
+            } else if (cookies != null && cookies.contains("")) {
+                getCookie(cookies, url);
             } else {
                 webview.loadUrl(url);
             }
@@ -36,23 +31,47 @@ public class AuthenticationActivity extends BaseActivity {
     }
 
     private static final String TAG = AuthenticationActivity.class.getName();
-    private WebView webview;
-    //    private String URL = "https://identity.qa-ext.livefyre.com/qa-blank.fyre.co/pages/auth/engage/?app=https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co&next=aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s";
-    private String URL = "https://identity.qa-ext.livefyre.com/qa-blank.fyre.co/pages/auth/engage/?app=https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co&next=aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s";
-
-    public static String TOKEN = "token";
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
+    public static String TOKEN = "token";
+    public static String ENVIRONMENT = "environment";
+    public static String NETWORK = "token";
+    public static String ENCODED_URL = "encodedUrlParamString";
+    public static String NEXT = "next";
+    private String environment, network, encodedUrlParamString, next;
+    private WebView webview;
+    private String URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
+        environment = getIntent().getStringExtra(ENVIRONMENT);
+        network = getIntent().getStringExtra(NETWORK);
+        encodedUrlParamString = getIntent().getStringExtra(ENCODED_URL);
+        next = getIntent().getStringExtra(NEXT);
 
+        if (environment == null || environment.length() == 0) {
+            showToast("Environment is empty.");
+            finish();
+        }
+
+        if (network == null || network.length() == 0) {
+            showToast("Network is empty.");
+            finish();
+        }
+
+        if (encodedUrlParamString == null || encodedUrlParamString.length() == 0) {
+            showToast("Encoded Url is empty.");
+            finish();
+        }
+
+        if (next == null || next.length() == 0) {
+            showToast("Next is empty.");
+            finish();
+        }
+
+        URL = String.format("https://identity.%s/%s/pages/auth/engage/?app=%s&next=%s", environment, network, encodedUrlParamString, next);
         webview = (WebView) findViewById(R.id.webview);
-        //removing all previous cookies
-//        CookieManager.getInstance().removeAllCookie();
-        //TODO : remove single cookie
-//        CookieManager.getInstance().setAcceptCookie(true);
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         webview.setWebChromeClient(new WebChromeClient());
@@ -80,12 +99,19 @@ public class AuthenticationActivity extends BaseActivity {
         cancelResult();
     }
 
-    public void getCookie(CookieManager cookieManager, String siteName) {
-        String cookies = cookieManager.getCookie(siteName);
+    public void getCookie(String cookies, String url) {
+        if (!cookies.contains("lfsp-profile")) {
+            webview.loadUrl(url);
+            return;
+        }
         String token = cookies.split(";")[2];
         token = token.substring(token.indexOf("=") + 2, token.length());
         try {
             JSONObject jsonObject = new JSONObject(Util.base64ToString(token));
+            if (jsonObject.optString("token") == null || jsonObject.optString("token").length() == 0) {
+                webview.loadUrl(url);
+                return;
+            }
             sendResult(jsonObject.optString("token"));
         } catch (JSONException e) {
             e.printStackTrace();

@@ -507,6 +507,10 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         public void onClick(View v) {
             if (loginTV.getText().equals("Login")) {
                 Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
+                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, "qa-ext.livefyre.com");
+                authenticationActivity.putExtra(AuthenticationActivity.NETWORK, "qa-blank.fyre.co");
+                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, "https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co");
+                authenticationActivity.putExtra(AuthenticationActivity.NEXT, "aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s");
                 startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
             } else {
                 SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);

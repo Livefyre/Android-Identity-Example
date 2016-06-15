@@ -195,11 +195,15 @@ public class NewActivity extends BaseActivity {
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+            showToast("Error posting comment!");
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+            showToast("Error posting comment!");
         }
 
         @Override
