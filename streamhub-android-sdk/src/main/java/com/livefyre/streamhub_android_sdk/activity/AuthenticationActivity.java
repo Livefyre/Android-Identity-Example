@@ -105,7 +105,8 @@ public class AuthenticationActivity extends BaseActivity {
             return;
         }
         String token = cookies.split(";")[2];
-        token = token.substring(token.indexOf("=") + 2, token.length());
+        token = token.replace("\"", "");
+        token = token.substring(token.indexOf("=")+1, token.length());
         try {
             JSONObject jsonObject = new JSONObject(Util.base64ToString(token));
             if (jsonObject.optString("token") == null || jsonObject.optString("token").length() == 0) {
