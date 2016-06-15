@@ -1,1 +1,1 @@
-include ':streamhub-android-sdk', ':streamhub-comments', ':filePickerSDK'
+include ':streamhub-android-sdk', ':streamhub-comments'

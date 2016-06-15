@@ -8,7 +8,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/filePickerSDK" />
             <option value="$PROJECT_DIR$/streamhub-android-sdk" />
             <option value="$PROJECT_DIR$/streamhub-comments" />
           </set>
@@ -16,7 +15,6 @@
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/filePickerSDK" />
             <option value="$PROJECT_DIR$/streamhub-android-sdk" />
             <option value="$PROJECT_DIR$/streamhub-comments" />
           </set>
