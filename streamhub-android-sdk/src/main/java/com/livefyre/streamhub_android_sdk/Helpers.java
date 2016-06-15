@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk;
 
 import android.util.Base64;
 

@@ -19,10 +19,10 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.kvana.streamhub_android_sdk.AdminClient;
-import com.kvana.streamhub_android_sdk.BootstrapClient;
-import com.kvana.streamhub_android_sdk.StreamClient;
-import com.kvana.streamhub_android_sdk.activity.AuthenticationActivity;
+import com.livefyre.streamhub_android_sdk.AdminClient;
+import com.livefyre.streamhub_android_sdk.BootstrapClient;
+import com.livefyre.streamhub_android_sdk.StreamClient;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
 import com.livefyre.comments.ContentHandler;
 import com.livefyre.comments.LFSAppConstants;

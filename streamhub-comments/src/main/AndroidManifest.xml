@@ -39,7 +39,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible" />
         <activity android:name=".activities.LoginActivity"/>
-        <activity android:name="com.kvana.streamhub_android_sdk.activity.AuthenticationActivity"/>
+        <activity android:name="com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity"/>
     </application>
 
 </manifest>

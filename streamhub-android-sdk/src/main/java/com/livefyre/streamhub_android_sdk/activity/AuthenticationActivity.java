@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk.activity;
+package com.livefyre.streamhub_android_sdk.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.kvana.streamhub_android_sdk.util.Util;
+import com.livefyre.streamhub_android_sdk.util.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;

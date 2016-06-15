@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk.util;
+package com.livefyre.streamhub_android_sdk.util;
 
 /**
  * Created by Hari on 02/06/16.

@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk.util;
+package com.livefyre.streamhub_android_sdk.util;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

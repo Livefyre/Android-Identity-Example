@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.kvana.streamhub_android_sdk.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.LivefyreConfig;
 import com.livefyre.comments.activities.SplashActivity;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.squareup.otto.Bus;

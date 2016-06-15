@@ -19,11 +19,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.kvana.streamhub_android_sdk.LFSActions;
-import com.kvana.streamhub_android_sdk.LFSConstants;
-import com.kvana.streamhub_android_sdk.LFSFlag;
-import com.kvana.streamhub_android_sdk.WriteClient;
-import com.kvana.streamhub_android_sdk.activity.AuthenticationActivity;
+import com.livefyre.streamhub_android_sdk.LFSActions;
+import com.livefyre.streamhub_android_sdk.LFSConstants;
+import com.livefyre.streamhub_android_sdk.LFSFlag;
+import com.livefyre.streamhub_android_sdk.WriteClient;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
 import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFSConfig;
