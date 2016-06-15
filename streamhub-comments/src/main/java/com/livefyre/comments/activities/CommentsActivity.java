@@ -180,7 +180,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 //        homeIcon.setBackgroundResource(R.drawable.flame);
 
         activityTitle = (TextView) findViewById(R.id.title_TV);
-        activityTitle.setText("LF Login");
         activityTitle.setOnClickListener(activityTitleListenerHide);
 
         loginTV = (TextView) findViewById(R.id.login_TV);
