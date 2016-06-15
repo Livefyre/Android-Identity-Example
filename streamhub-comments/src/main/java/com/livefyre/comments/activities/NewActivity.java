@@ -14,8 +14,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.filepicker.sdk.FilePicker;
-import com.filepicker.sdk.FilePickerAPI;
 import com.kvana.streamhub_android_sdk.LFSActions;
 import com.kvana.streamhub_android_sdk.LFSConstants;
 import com.kvana.streamhub_android_sdk.WriteClient;
@@ -36,9 +34,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import cz.msebera.android.httpclient.Header;
+import io.filepicker.Filepicker;
+import io.filepicker.models.FPFile;
 
 public class NewActivity extends BaseActivity {
     public static final String TAG = NewActivity.class.getSimpleName();
@@ -338,9 +339,9 @@ public class NewActivity extends BaseActivity {
             if (LFSConfig.FILEPICKER_API_KEY.length() == 0) {
                 showToast("Something went wrong.");
             } else {
-                Intent intent = new Intent(NewActivity.this, FilePicker.class);
-                FilePickerAPI.setKey(LFSConfig.FILEPICKER_API_KEY);
-                startActivityForResult(intent, FilePickerAPI.REQUEST_CODE_GETFILE);
+                Intent intent = new Intent(NewActivity.this, Filepicker.class);
+                Filepicker.setKey(LFSConfig.FILEPICKER_API_KEY);
+                startActivityForResult(intent, Filepicker.REQUEST_CODE_GETFILE);
             }
         }
     };
@@ -349,9 +350,9 @@ public class NewActivity extends BaseActivity {
     DialogInterface.OnClickListener selectImageDialogAction = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface arg0, int arg1) {
-            Intent intent = new Intent(NewActivity.this, FilePicker.class);
-            FilePickerAPI.setKey(LFSConfig.FILEPICKER_API_KEY);
-            startActivityForResult(intent, FilePickerAPI.REQUEST_CODE_GETFILE);
+            Intent intent = new Intent(NewActivity.this, Filepicker.class);
+            Filepicker.setKey(LFSConfig.FILEPICKER_API_KEY);
+            startActivityForResult(intent, Filepicker.REQUEST_CODE_GETFILE);
         }
     };
 
@@ -365,7 +366,7 @@ public class NewActivity extends BaseActivity {
     //On Image Selected
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == FilePickerAPI.REQUEST_CODE_GETFILE) {
+        if (requestCode == Filepicker.REQUEST_CODE_GETFILE) {
             if (resultCode != RESULT_OK) {
                 // Result was cancelled by the user or there was an error
                 showAlert("No Image Selected.", "SELECT IMAGE", selectImageDialogAction);
@@ -375,9 +376,9 @@ public class NewActivity extends BaseActivity {
             }
             attachImageLL.setVisibility(View.GONE);
             attacheImageFL.setVisibility(View.VISIBLE);
-
-            String imgUrl = data.getExtras().getString("fpurl");
-            application.printLog(true, TAG + "Uploaded Image URL", imgUrl + " ");
+            ArrayList<FPFile> fpFiles = data.getParcelableArrayListExtra(Filepicker.FPFILES_EXTRA);
+            String imgUrl = fpFiles.get(0).getUrl();
+            Log.d("url", imgUrl + "");
             try {
                 imgObj = new JSONObject();
                 imgObj.put("link", imgUrl);

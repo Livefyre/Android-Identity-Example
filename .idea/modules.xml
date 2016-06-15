@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/filePickerSDK/filePickerSDK.iml" filepath="$PROJECT_DIR$/filePickerSDK/filePickerSDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/livefyre-android-sdk.iml" filepath="$PROJECT_DIR$/livefyre-android-sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" filepath="$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/streamhub-comments/streamhub-comments.iml" filepath="$PROJECT_DIR$/streamhub-comments/streamhub-comments.iml" />
