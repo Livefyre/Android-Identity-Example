@@ -188,7 +188,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
         String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
 
-        if (token == null && token.equals("")) {
+        if (token == null || token.equals("")) {
             loginTV.setText("Login");
         } else {
             loginTV.setText("Logout");
@@ -216,7 +216,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
         String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
 
-        if (token == null && token.equals("")) {
+        if (token == null || token.equals("")) {
             showToast("Not logged in");
             return;
         }
