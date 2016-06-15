@@ -1,4 +1,4 @@
-package com.kvana.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
