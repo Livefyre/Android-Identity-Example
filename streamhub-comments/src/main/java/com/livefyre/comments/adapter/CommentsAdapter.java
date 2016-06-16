@@ -265,7 +265,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
 
     }
 
-    String likedCount(List<Vote> v) {
+    private String likedCount(List<Vote> v) {
         int count = 0;
         for (int i = 0; i < v.size(); i++) {
             if (v.get(i).getValue().equals("1"))

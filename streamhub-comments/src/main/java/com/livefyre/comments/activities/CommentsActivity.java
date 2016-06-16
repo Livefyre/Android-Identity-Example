@@ -50,14 +50,7 @@ import static android.support.v7.widget.RecyclerView.OnClickListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
 
 public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
-
-    public interface ClickListener {
-        void onClick(View view, int position);
-
-        void onLongClick(View view, int position);
-    }
-
-    public class StreamCallBack extends AsyncHttpResponseHandler {
+    private class StreamCallBack extends AsyncHttpResponseHandler {
 
         @Override
         public void onSuccess(int i, Header[] headers, byte[] bytes) {
@@ -98,7 +91,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
     }
 
-    public OnScrollListener onScrollListener = new OnScrollListener() {
+    private OnScrollListener onScrollListener = new OnScrollListener() {
         boolean hideToolBar = false;
 
         @Override
@@ -174,13 +167,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onClick(DialogInterface arg0, int arg1) {
             adminClintCall();
-        }
-    };
-
-    private OnClickListener postNewCommentListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
         }
     };
     public static final String TAG = CommentsActivity.class.getSimpleName();
