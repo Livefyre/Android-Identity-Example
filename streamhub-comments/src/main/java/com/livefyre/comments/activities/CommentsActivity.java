@@ -47,7 +47,7 @@ import java.util.HashSet;
 
 import cz.msebera.android.httpclient.Header;
 
-import static android.support.v7.widget.RecyclerView.OnClickListener;
+import static android.view.View.OnClickListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
 
 public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
@@ -104,7 +104,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
     }
 
-    private class InitCallback extends JsonHttpResponseHandler {
+    private class BootstrapClientCallback extends JsonHttpResponseHandler {
 
         @Override
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -493,7 +493,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
     private void bootstrapClientCall() {
         try {
-            BootstrapClient.getInit(LFSConfig.SITE_ID, LFSConfig.ARTICLE_ID, new InitCallback());
+            BootstrapClient.getInit(LFSConfig.SITE_ID, LFSConfig.ARTICLE_ID, new BootstrapClientCallback());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
