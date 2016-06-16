@@ -438,7 +438,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         }
     }
 
-    void buildCommentList(String data) {
+    private void buildCommentList(String data) {
         try {
             content = new ContentHandler(new JSONObject(data), getBaseContext());
             content.getContentFromResponse(this);
@@ -454,7 +454,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         dismissProgressDialog();
 
     }
-
 
     private boolean isExistComment(String commentId) {
         for (Content bean : commentsArray) {
