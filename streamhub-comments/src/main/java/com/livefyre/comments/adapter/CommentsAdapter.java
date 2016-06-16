@@ -1,6 +1,7 @@
 package com.livefyre.comments.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFUtils;
 import com.livefyre.comments.R;
 import com.livefyre.comments.RoundedTransformation;
+import com.livefyre.comments.activities.CommentActivity;
 import com.livefyre.comments.models.Attachments;
 import com.livefyre.comments.models.Content;
 import com.livefyre.comments.models.Vote;
@@ -29,7 +31,7 @@ import java.util.List;
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyViewHolder> {
     private LFCApplication application = AppSingleton.getInstance().getApplication();
     private LayoutInflater mLayoutInflater;
-    Context mContext;
+    private Context mContext;
     private List<Content> contentArray = null;
 
     private static final int VIEW_COUNT = 3;
@@ -78,9 +80,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
         switch (viewType) {
             case PARENT:
             case CHILD:
-
                 try {
-
                     float density = mContext.getResources().getDisplayMetrics().density;
 
                     int px = (int) (40 * density);
@@ -88,8 +88,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                     if (comment.getParentPath() != null) {
                         depthValue = comment.getParentPath().size();
                     }
-
-
                     switch (depthValue) {
                         case 0:
                             holder.commentsListItemLL.setPadding(16, 0, 16, 16);
@@ -106,7 +104,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                         default:
                             holder.commentsListItemLL.setPadding(px * 3, 0, 16, 16);
                             break;
-
                     }
 
                     holder.bottomLine.setVisibility(View.VISIBLE);
@@ -151,11 +148,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                     }
                     if (comment.getAttachments() != null) {
                         if (comment.getAttachments().size() > 0) {
-
                             Attachments mAttachments = comment.getAttachments().get(0);
-
                             if (mAttachments.getType().equals("video")) {
-
                                 if (mAttachments.getThumbnail_url() != null) {
                                     if (mAttachments.getThumbnail_url().length() > 0) {
                                         holder.imageAttachedToCommentIv.setVisibility(View.VISIBLE);
@@ -168,8 +162,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                                     holder.imageAttachedToCommentIv.setVisibility(View.GONE);
                                 }
                             } else {
-
-
                                 if (mAttachments.getUrl() != null) {
                                     if (mAttachments.getUrl().length() > 0) {
                                         holder.imageAttachedToCommentIv.setVisibility(View.VISIBLE);
@@ -230,7 +222,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
         return contentArray.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // each data item is just a string in this case
         View bottomLine;
 
@@ -242,7 +234,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
 
         public MyViewHolder(View item) {
             super(item);
-
+            item.setOnClickListener(this);
             bottomLine = item.findViewById(R.id.bottomLine);
             commentsListItemLL = (LinearLayout) item.findViewById(R.id.commentsListItemLL);
             deleted_item = (LinearLayout) item.findViewById(R.id.deletedCell);
@@ -255,15 +247,30 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
             avatarIv = (ImageView) item.findViewById(R.id.avatarIv);
             imageAttachedToCommentIv = (ImageView) item.findViewById(R.id.imageAttachedToCommentIv);
         }
+
+        @Override
+        public void onClick(View v) {
+            switch (contentArray.get(getLayoutPosition()).getContentType().getValue()) {
+                case PARENT:
+                case CHILD:
+                    Intent detailViewIntent = new Intent(mContext, CommentActivity.class);
+                    detailViewIntent.putExtra(LFSAppConstants.ID, contentArray.get(getLayoutPosition()).getId());
+                    mContext.startActivity(detailViewIntent);
+                    break;
+                case DELETED:
+                    break;
+            }
+        }
+
+
     }
 
-    String likedCount(List<Vote> v) {
+    private String likedCount(List<Vote> v) {
         int count = 0;
         for (int i = 0; i < v.size(); i++) {
             if (v.get(i).getValue().equals("1"))
                 count++;
         }
-        return "Likes " + v.size();
+        return "Likes " + count;
     }
-
 }

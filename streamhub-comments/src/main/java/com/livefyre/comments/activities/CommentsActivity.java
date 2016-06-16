@@ -1,6 +1,5 @@
 package com.livefyre.comments.activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -9,8 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.ImageButton;
@@ -49,24 +47,139 @@ import java.util.HashSet;
 import cz.msebera.android.httpclient.Header;
 
 import static android.support.v7.widget.RecyclerView.OnClickListener;
-import static android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
 
-public class CommentsActivity extends BaseActivity implements ContentUpdateListener {
+public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
+    private class StreamCallBack extends AsyncHttpResponseHandler {
+
+        @Override
+        public void onSuccess(int i, Header[] headers, byte[] bytes) {
+            String response = new String(bytes);
+            Log.d(TAG, "StreamCallBack-onSuccess");
+            if (response != null) {
+                content.setStreamData(response);
+            }
+        }
+
+        @Override
+        public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+            Log.e(TAG, "StreamCallBack-onFailure: " + throwable.getLocalizedMessage());
+        }
+    }
+
+    private class InitCallback extends JsonHttpResponseHandler {
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            super.onSuccess(statusCode, headers, response);
+            application.printLog(false, TAG + "-InitCallback-onSuccess", response.toString());
+
+            try {
+                String responseString = response.toString();
+                buildCommentList(responseString);
+                swipeView.setRefreshing(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            super.onFailure(statusCode, headers, responseString, throwable);
+            application.printLog(true, TAG + "-InitCallback-onFailure", throwable.toString());
+        }
+
+    }
+
+    private OnScrollListener onScrollListener = new OnScrollListener() {
+        boolean hideToolBar = false;
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (hideToolBar) {
+                postNewCommentIv.setVisibility(View.GONE);
+                getSupportActionBar().hide();
+            } else {
+                postNewCommentIv.setVisibility(View.VISIBLE);
+                getSupportActionBar().show();
+            }
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            if (dy > 2) {
+                hideToolBar = true;
+            } else if (dy < -1) {
+                hideToolBar = false;
+
+            }
+        }
+    };
+    private OnClickListener activityTitleListenerHide = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                activityTitle.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                activityTitle.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+            }
+
+            postNewCommentIv.setVisibility(View.GONE);
+
+
+            activityTitle.setOnClickListener(activityTitleListenerShow);
+
+        }
+    };
+    private OnClickListener activityTitleListenerShow = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            postNewCommentIv.setVisibility(View.VISIBLE);
+
+            activityTitle.setOnClickListener(activityTitleListenerHide);
+
+        }
+    };
+
+    private OnClickListener loginListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (loginTV.getText().equals("Login")) {
+                Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
+                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
+                authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
+                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
+                authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
+                startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+            } else {
+                SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
+                CookieManager.getInstance().removeAllCookie();
+                loginTV.setText("Login");
+            }
+        }
+    };
+    private DialogInterface.OnClickListener tryAgain = new DialogInterface.OnClickListener() {
+
+        @Override
+        public void onClick(DialogInterface arg0, int arg1) {
+            adminClintCall();
+        }
+    };
     public static final String TAG = CommentsActivity.class.getSimpleName();
-
-    Toolbar toolbar;
-
-    TextView activityTitle, loginTV, notifMsgTV;
-
-    RecyclerView commentsLV;
-    CommentsAdapter mCommentsAdapter;
-    ImageButton postNewCommentIv;
-    ArrayList<Content> commentsArray;
-    ContentHandler content;
+    private Toolbar toolbar;
+    private TextView activityTitle, loginTV, notifMsgTV;
+    private RecyclerView commentsLV;
+    private CommentsAdapter mCommentsAdapter;
+    private ImageButton postNewCommentIv;
+    private ArrayList<Content> commentsArray;
+    private ContentHandler content;
     private SwipeRefreshLayout swipeView;
-    LinearLayout notification;
-    Bus mBus = application.getBus();
+    private LinearLayout notification;
+    private Bus mBus = application.getBus();
     private String adminClintId = "No";
     private static final int DELETED = -1;
     private static final int PARENT = 0;
@@ -87,48 +200,29 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         bootstrapClientCall();
     }
 
-    private void setListenersToViews() {
-        postNewCommentIv.setOnClickListener(postNewCommentListener);
-        commentsLV.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), commentsLV, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                int viewType = commentsArray.get(position).getContentType().getValue();
-                switch (viewType) {
-                    case PARENT:
-                    case CHILD:
-                        Intent detailViewIntent = new Intent(CommentsActivity.this, CommentActivity.class);
-                        detailViewIntent.putExtra(LFSAppConstants.ID, commentsArray.get(position).getId());
-                        startActivity(detailViewIntent);
-                        break;
-                    case DELETED:
-                        break;
-                }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
+                SharedPreferenceManager.getInstance().putString(AuthenticationActivity.TOKEN, data.getStringExtra(AuthenticationActivity.TOKEN));
+                adminClintCall();
             }
+        }
+    }
 
-            @Override
-            public void onLongClick(View view, int position) {
-            }
-        }));
-        swipeView.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
-        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeView.setRefreshing(true);
-                mCommentsAdapter = null;
-                commentsArray.clear();
-                mCommentsAdapter = new CommentsAdapter(getApplication(), commentsArray);
-                commentsLV.setAdapter(mCommentsAdapter);
-                bootstrapClientCall();
-
-                YoYo.with(Techniques.FadeIn)
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.postNewCommentIv:
+                YoYo.with(Techniques.ZoomIn)
                         .duration(700)
-                        .playOn(findViewById(R.id.commentsLV));
-            }
-        });
-        commentsLV.setOnScrollListener(onScrollListener);
-        notification.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                        .playOn(findViewById(R.id.notification));
+                Intent intent = new Intent(CommentsActivity.this, NewActivity.class);
+                intent.putExtra(LFSAppConstants.PURPOSE, LFSAppConstants.NEW_COMMENT);
+                startActivity(intent);
+                break;
+            case R.id.notification:
                 YoYo.with(Techniques.BounceInUp)
                         .duration(700)
                         .playOn(findViewById(R.id.notification));
@@ -154,8 +248,36 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                     scrollToComment(stateBeanId);
                 }
                 newComments.clear();
+                break;
+        }
+    }
+
+    @Override
+    public void loadImage(String imageURL) {
+        if (imageURL.length() > 0)
+            Picasso.with(getBaseContext()).load(imageURL);
+    }
+
+    private void setListenersToViews() {
+        postNewCommentIv.setOnClickListener(this);
+        notification.setOnClickListener(this);
+        swipeView.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
+        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeView.setRefreshing(true);
+                mCommentsAdapter = null;
+                commentsArray.clear();
+                mCommentsAdapter = new CommentsAdapter(getApplication(), commentsArray);
+                commentsLV.setAdapter(mCommentsAdapter);
+                bootstrapClientCall();
+
+                YoYo.with(Techniques.FadeIn)
+                        .duration(700)
+                        .playOn(findViewById(R.id.commentsLV));
             }
         });
+        commentsLV.setOnScrollListener(onScrollListener);
     }
 
     private void scrollToComment(String mCommentBeanId) {
@@ -297,12 +419,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     }
 
 
-    @Override
-    public void loadImage(String imageURL) {
-        if (imageURL.length() > 0)
-            Picasso.with(getBaseContext()).load(imageURL);
-    }
-
     Boolean isExistComment(String commentId) {
         for (Content bean : commentsArray) {
             if (bean.getId().equals(commentId))
@@ -311,29 +427,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         return false;
     }
 
-    private class InitCallback extends JsonHttpResponseHandler {
-
-        @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            super.onSuccess(statusCode, headers, response);
-            application.printLog(false, TAG + "-InitCallback-onSuccess", response.toString());
-
-            try {
-                String responseString = response.toString();
-                buildCommentList(responseString);
-                swipeView.setRefreshing(false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            application.printLog(true, TAG + "-InitCallback-onFailure", throwable.toString());
-        }
-
-    }
 
     void buildCommentList(String data) {
         try {
@@ -354,181 +447,14 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     void streamClintCall() {
         try {
             StreamClient.pollStreamEndpoint(
-                    LFSConfig.COLLECTION_ID, ContentHandler.lastEvent,
+                    LFSConfig.COLLECTION_ID,
+                    ContentHandler.lastEvent,
                     new StreamCallBack());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public class StreamCallBack extends AsyncHttpResponseHandler {
-
-        @Override
-        public void onSuccess(int i, Header[] headers, byte[] bytes) {
-            String response = new String(bytes);
-            if (response != null) {
-                content.setStreamData(response);
-            }
-        }
-
-        @Override
-        public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-
-        }
-    }
-
-    DialogInterface.OnClickListener tryAgain = new DialogInterface.OnClickListener() {
-
-        @Override
-        public void onClick(DialogInterface arg0, int arg1) {
-            adminClintCall();
-        }
-    };
-
-    OnClickListener postNewCommentListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            YoYo.with(Techniques.ZoomIn)
-                    .duration(700)
-                    .playOn(findViewById(R.id.notification));
-            Intent intent = new Intent(CommentsActivity.this, NewActivity.class);
-            intent.putExtra(LFSAppConstants.PURPOSE, LFSAppConstants.NEW_COMMENT);
-            startActivity(intent);
-        }
-    };
-
-    static class RecyclerTouchListener implements OnItemTouchListener {
-
-        private GestureDetector gestureDetector;
-        private ClickListener clickListener;
-
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
-            this.clickListener = clickListener;
-            gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onSingleTapUp(MotionEvent e) {
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
-                    if (child != null && clickListener != null) {
-                        clickListener.onLongClick(child, recyclerView.getChildPosition(child));
-                    }
-                }
-            });
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            View child = rv.findChildViewUnder(e.getX(), e.getY());
-            if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
-                clickListener.onClick(child, rv.getChildPosition(child));
-            }
-            return false;
-        }
-
-        @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        }
-
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        }
-    }
-
-    public static interface ClickListener {
-        public void onClick(View view, int position);
-
-        public void onLongClick(View view, int position);
-    }
-
-    public OnScrollListener onScrollListener = new OnScrollListener() {
-        boolean hideToolBar = false;
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-            if (hideToolBar) {
-                postNewCommentIv.setVisibility(View.GONE);
-                getSupportActionBar().hide();
-            } else {
-                postNewCommentIv.setVisibility(View.VISIBLE);
-                getSupportActionBar().show();
-            }
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            if (dy > 2) {
-                hideToolBar = true;
-            } else if (dy < -1) {
-                hideToolBar = false;
-
-            }
-        }
-    };
-
-    OnClickListener activityTitleListenerHide = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                activityTitle.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                activityTitle.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-            }
-
-            postNewCommentIv.setVisibility(View.GONE);
-
-
-            activityTitle.setOnClickListener(activityTitleListenerShow);
-
-        }
-    };
-    OnClickListener activityTitleListenerShow = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            postNewCommentIv.setVisibility(View.VISIBLE);
-
-            activityTitle.setOnClickListener(activityTitleListenerHide);
-
-        }
-    };
-
-    OnClickListener loginListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (loginTV.getText().equals("Login")) {
-                Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
-                authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
-                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
-                authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
-                startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
-            } else {
-                SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
-                CookieManager.getInstance().removeAllCookie();
-                loginTV.setText("Login");
-            }
-        }
-    };
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
-                SharedPreferenceManager.getInstance().putString(AuthenticationActivity.TOKEN, data.getStringExtra(AuthenticationActivity.TOKEN));
-                adminClintCall();
-            }
-        }
-    }
 
     public void onDataUpdate(HashSet<String> authorsSet, HashSet<String> statesSet, HashSet<String> annotationsSet, HashSet<String> updates) {
         application.printLog(true, TAG, "" + statesSet);
