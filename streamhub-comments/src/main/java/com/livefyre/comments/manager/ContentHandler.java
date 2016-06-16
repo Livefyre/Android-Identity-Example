@@ -1,4 +1,4 @@
-package com.livefyre.comments;
+package com.livefyre.comments.manager;
 
 import android.content.Context;
 import android.util.Log;

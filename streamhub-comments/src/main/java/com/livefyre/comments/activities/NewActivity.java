@@ -18,10 +18,9 @@ import com.livefyre.streamhub_android_sdk.LFSActions;
 import com.livefyre.streamhub_android_sdk.LFSConstants;
 import com.livefyre.streamhub_android_sdk.WriteClient;
 import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
-import com.livefyre.comments.BaseActivity;
-import com.livefyre.comments.LFSAppConstants;
-import com.livefyre.comments.LFSConfig;
-import com.livefyre.comments.LFUtils;
+import com.livefyre.comments.util.Constant;
+import com.livefyre.comments.Config;
+import com.livefyre.comments.util.Util;
 import com.livefyre.comments.R;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -71,16 +70,16 @@ public class NewActivity extends BaseActivity {
 
     private void getDataFromIntent() {
         Intent intent = getIntent();
-        purpose = intent.getStringExtra(LFSAppConstants.PURPOSE);
+        purpose = intent.getStringExtra(Constant.PURPOSE);
 
-        if (purpose.equals(LFSAppConstants.NEW_COMMENT)) {
+        if (purpose.equals(Constant.NEW_COMMENT)) {
 
-        } else if (purpose.equals(LFSAppConstants.NEW_REPLY)) {
-            id = intent.getStringExtra(LFSAppConstants.ID);
-        } else if (purpose.equals(LFSAppConstants.EDIT)) {
-            id = intent.getStringExtra(LFSAppConstants.ID);
-            body = intent.getStringExtra(LFSAppConstants.BODY);
-            commentEt.setText(LFUtils.trimTrailingWhitespace(Html
+        } else if (purpose.equals(Constant.NEW_REPLY)) {
+            id = intent.getStringExtra(Constant.ID);
+        } else if (purpose.equals(Constant.EDIT)) {
+            id = intent.getStringExtra(Constant.ID);
+            body = intent.getStringExtra(Constant.BODY);
+            commentEt.setText(Util.trimTrailingWhitespace(Html
                             .fromHtml(body)),
                     TextView.BufferType.SPANNABLE);
         }
@@ -109,14 +108,14 @@ public class NewActivity extends BaseActivity {
         //Activity Name
         TextView activityName = (TextView) findViewById(R.id.activityTitle);
 
-        if (purpose.equals(LFSAppConstants.NEW_COMMENT)) {
+        if (purpose.equals(Constant.NEW_COMMENT)) {
             commentEt.setHint("Write your comment here...");//setting hint to Edittext
             activityName.setText("New Comment");
-        } else if (purpose.equals(LFSAppConstants.NEW_REPLY)) {
+        } else if (purpose.equals(Constant.NEW_REPLY)) {
             commentEt.setHint("Write your Reply here...");//setting hint to Edittext
             activityName.setText("Reply");
             attachImageLL.setVisibility(View.VISIBLE);//Hide Image Selection option
-        } else if (purpose.equals(LFSAppConstants.EDIT)) {
+        } else if (purpose.equals(Constant.EDIT)) {
             activityName.setText("Edit");
             attachImageLL.setVisibility(View.GONE);//Hide Image Selection option
         }
@@ -150,7 +149,7 @@ public class NewActivity extends BaseActivity {
                     (new JSONArray().put(imgObj)).toString());
         try {
             WriteClient.postContent(
-                    LFSConfig.COLLECTION_ID, null, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
+                    Config.COLLECTION_ID, null, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
                     parameters, new writeclientCallback());
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -160,7 +159,7 @@ public class NewActivity extends BaseActivity {
     void postNewReply(String body) {
         showProgressDialog();
 
-        if (purpose.equals(LFSAppConstants.NEW_REPLY)) {
+        if (purpose.equals(Constant.NEW_REPLY)) {
             Log.d("REPLY", "IN NEW REPLY");
             HashMap<String, Object> parameters = new HashMap<>();
             parameters.put(LFSConstants.LFSPostBodyKey, body);
@@ -173,18 +172,18 @@ public class NewActivity extends BaseActivity {
                         (new JSONArray().put(imgObj)).toString());
             try {
                 WriteClient.postContent(
-                        LFSConfig.COLLECTION_ID, id, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
+                        Config.COLLECTION_ID, id, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
                         parameters, new newReplyCallback());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-        } else if (purpose.equals(LFSAppConstants.EDIT)) {
+        } else if (purpose.equals(Constant.EDIT)) {
             Log.d("EDIT", "IN EDIT REPLY");
             RequestParams parameters = new RequestParams();
             parameters.put(LFSConstants.LFSPostBodyKey, body);
             parameters.put(LFSConstants.LFSPostUserTokenKey,
                     SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
-            WriteClient.postAction(LFSConfig.COLLECTION_ID, id,
+            WriteClient.postAction(Config.COLLECTION_ID, id,
                     SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSActions.EDIT, parameters,
                     new editCallback());
         }
@@ -308,7 +307,7 @@ public class NewActivity extends BaseActivity {
                 showAlert("Please enter text to post.", "TRY AGAIN", tryAgain);
                 return;
             }
-            if (purpose.equals(LFSAppConstants.NEW_COMMENT)) {
+            if (purpose.equals(Constant.NEW_COMMENT)) {
                 String descriptionHTML = Html.toHtml((android.text.Spanned) commentEt.getText());
                 postNewComment(descriptionHTML);
             } else {
@@ -336,11 +335,11 @@ public class NewActivity extends BaseActivity {
     View.OnClickListener attachImageLLListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (LFSConfig.FILEPICKER_API_KEY.length() == 0) {
+            if (Config.FILEPICKER_API_KEY.length() == 0) {
                 showToast("Something went wrong.");
             } else {
                 Intent intent = new Intent(NewActivity.this, Filepicker.class);
-                Filepicker.setKey(LFSConfig.FILEPICKER_API_KEY);
+                Filepicker.setKey(Config.FILEPICKER_API_KEY);
                 startActivityForResult(intent, Filepicker.REQUEST_CODE_GETFILE);
             }
         }
@@ -351,7 +350,7 @@ public class NewActivity extends BaseActivity {
         @Override
         public void onClick(DialogInterface arg0, int arg1) {
             Intent intent = new Intent(NewActivity.this, Filepicker.class);
-            Filepicker.setKey(LFSConfig.FILEPICKER_API_KEY);
+            Filepicker.setKey(Config.FILEPICKER_API_KEY);
             startActivityForResult(intent, Filepicker.REQUEST_CODE_GETFILE);
         }
     };

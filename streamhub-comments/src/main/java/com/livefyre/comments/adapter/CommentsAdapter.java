@@ -11,11 +11,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.livefyre.comments.LFCApplication;
-import com.livefyre.comments.LFSAppConstants;
-import com.livefyre.comments.LFUtils;
+import com.livefyre.comments.util.Constant;
+import com.livefyre.comments.util.Util;
 import com.livefyre.comments.R;
-import com.livefyre.comments.RoundedTransformation;
+import com.livefyre.comments.util.RoundedTransformation;
 import com.livefyre.comments.activities.CommentActivity;
 import com.livefyre.comments.models.Attachments;
 import com.livefyre.comments.models.Content;
@@ -109,10 +108,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                     //Author Name
                     holder.authorNameTv.setText(comment.getAuthor().getDisplayName());
                     //Posted Date
-                    holder.postedDateOrTime.setText(LFUtils.getFormatedDate(
-                            comment.getCreatedAt(), LFSAppConstants.SHART));
+                    holder.postedDateOrTime.setText(Util.getFormatedDate(
+                            comment.getCreatedAt(), Constant.SHART));
                     //Comment Body
-                    holder.commentBody.setText(LFUtils.trimTrailingWhitespace(Html
+                    holder.commentBody.setText(Util.trimTrailingWhitespace(Html
                                     .fromHtml(comment.getBodyHtml())),
                             TextView.BufferType.SPANNABLE);
                     //Moderator
@@ -251,7 +250,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                 case PARENT:
                 case CHILD:
                     Intent detailViewIntent = new Intent(mContext, CommentActivity.class);
-                    detailViewIntent.putExtra(LFSAppConstants.ID, contentArray.get(getLayoutPosition()).getId());
+                    detailViewIntent.putExtra(Constant.ID, contentArray.get(getLayoutPosition()).getId());
                     mContext.startActivity(detailViewIntent);
                     break;
                 case DELETED:

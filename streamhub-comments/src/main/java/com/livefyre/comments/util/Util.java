@@ -1,4 +1,4 @@
-package com.livefyre.comments;
+package com.livefyre.comments.util;
 
 import android.annotation.SuppressLint;
 
@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LFUtils {
+public class Util {
 
 
 

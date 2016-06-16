@@ -1,4 +1,4 @@
-package com.livefyre.comments;
+package com.livefyre.comments.activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.livefyre.comments.R;
 
 public class BaseActivity extends AppCompatActivity {
     private static final String TAG = BaseActivity.class.getName();

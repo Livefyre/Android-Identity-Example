@@ -17,10 +17,9 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.livefyre.comments.BaseActivity;
-import com.livefyre.comments.ContentHandler;
-import com.livefyre.comments.LFSAppConstants;
-import com.livefyre.comments.LFSConfig;
+import com.livefyre.comments.manager.ContentHandler;
+import com.livefyre.comments.util.Constant;
+import com.livefyre.comments.Config;
 import com.livefyre.comments.R;
 import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
@@ -76,17 +75,17 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 if (!data.isNull("permissions")) {
                     JSONObject permissions = data.getJSONObject("permissions");
                     if (!permissions.isNull("moderator_key"))
-                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "yes");
+                        SharedPreferenceManager.getInstance().putString(Constant.ISMOD, "yes");
                     else {
-                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
+                        SharedPreferenceManager.getInstance().putString(Constant.ISMOD, "no");
                     }
                 } else {
-                    SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
+                    SharedPreferenceManager.getInstance().putString(Constant.ISMOD, "no");
                 }
                 if (!data.isNull("profile")) {
                     JSONObject profile = data.getJSONObject("profile");
                     if (!profile.isNull("id")) {
-                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ID, profile.getString("id"));
+                        SharedPreferenceManager.getInstance().putString(Constant.ID, profile.getString("id"));
                         adminClintId = profile.getString("id");
                     }
                 }
@@ -255,7 +254,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                         .duration(700)
                         .playOn(findViewById(R.id.notification));
                 Intent intent = new Intent(CommentsActivity.this, NewActivity.class);
-                intent.putExtra(LFSAppConstants.PURPOSE, LFSAppConstants.NEW_COMMENT);
+                intent.putExtra(Constant.PURPOSE, Constant.NEW_COMMENT);
                 startActivity(intent);
                 break;
             case R.id.notification:
@@ -288,10 +287,10 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
             case R.id.login_TV:
                 if (loginTV.getText().equals("Login")) {
                     Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-                    authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
-                    authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
-                    authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
-                    authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
+                    authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, Config.ENVIRONMENT);
+                    authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, Config.NETWORK_ID);
+                    authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, Config.ENCODED_URL);
+                    authenticationActivity.putExtra(AuthenticationActivity.NEXT, Config.NEXT);
                     startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
                 } else {
                     SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
@@ -482,9 +481,9 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         try {
             AdminClient.authenticateUser(
                     token,
-                    LFSConfig.COLLECTION_ID,
-                    LFSConfig.ARTICLE_ID,
-                    LFSConfig.SITE_ID,
+                    Config.COLLECTION_ID,
+                    Config.ARTICLE_ID,
+                    Config.SITE_ID,
                     new AdminCallback());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -493,7 +492,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
     private void bootstrapClientCall() {
         try {
-            BootstrapClient.getInit(LFSConfig.SITE_ID, LFSConfig.ARTICLE_ID, new BootstrapClientCallback());
+            BootstrapClient.getInit(Config.SITE_ID, Config.ARTICLE_ID, new BootstrapClientCallback());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -502,7 +501,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     private void streamClintCall() {
         try {
             StreamClient.pollStreamEndpoint(
-                    LFSConfig.COLLECTION_ID,
+                    Config.COLLECTION_ID,
                     ContentHandler.lastEvent,
                     new StreamCallBack());
         } catch (IOException | JSONException e) {
