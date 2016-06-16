@@ -1,6 +1,5 @@
 package com.livefyre.comments.activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -10,8 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.widget.ImageButton;
@@ -50,7 +47,6 @@ import java.util.HashSet;
 import cz.msebera.android.httpclient.Header;
 
 import static android.support.v7.widget.RecyclerView.OnClickListener;
-import static android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
 
 public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
@@ -75,47 +71,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
             Log.e(TAG, "StreamCallBack-onFailure: " + throwable.getLocalizedMessage());
-        }
-    }
-
-    static class RecyclerTouchListener implements OnItemTouchListener {
-
-        private GestureDetector gestureDetector;
-        private ClickListener clickListener;
-
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
-            this.clickListener = clickListener;
-            gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onSingleTapUp(MotionEvent e) {
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
-                    if (child != null && clickListener != null) {
-                        clickListener.onLongClick(child, recyclerView.getChildPosition(child));
-                    }
-                }
-            });
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            View child = rv.findChildViewUnder(e.getX(), e.getY());
-            if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
-                clickListener.onClick(child, rv.getChildPosition(child));
-            }
-            return false;
-        }
-
-        @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        }
-
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         }
     }
 
@@ -320,26 +275,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     private void setListenersToViews() {
         postNewCommentIv.setOnClickListener(this);
         notification.setOnClickListener(this);
-        commentsLV.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), commentsLV, new ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                int viewType = commentsArray.get(position).getContentType().getValue();
-                switch (viewType) {
-                    case PARENT:
-                    case CHILD:
-                        Intent detailViewIntent = new Intent(CommentsActivity.this, CommentActivity.class);
-                        detailViewIntent.putExtra(LFSAppConstants.ID, commentsArray.get(position).getId());
-                        startActivity(detailViewIntent);
-                        break;
-                    case DELETED:
-                        break;
-                }
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-            }
-        }));
         swipeView.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
         swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
