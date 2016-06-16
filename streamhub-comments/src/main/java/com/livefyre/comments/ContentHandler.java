@@ -50,8 +50,7 @@ public class ContentHandler {
         SortedContents = new ArrayList<>();
         parentsList = new ArrayList<>();
         // Collecting Authors
-        JSONObject headDocument = jsonResponseObject
-                .getJSONObject("headDocument");
+        JSONObject headDocument = jsonResponseObject .getJSONObject("headDocument");
         lastEvent = headDocument.getString("event");
 
         JSONObject authorsJsonObj = headDocument.getJSONObject("authors");

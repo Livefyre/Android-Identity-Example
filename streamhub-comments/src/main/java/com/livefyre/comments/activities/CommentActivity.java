@@ -19,12 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.livefyre.streamhub_android_sdk.LFSActions;
-import com.livefyre.streamhub_android_sdk.LFSConstants;
-import com.livefyre.streamhub_android_sdk.LFSFlag;
-import com.livefyre.streamhub_android_sdk.WriteClient;
-import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
+import com.livefyre.comments.ContentHandler;
 import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFSConfig;
 import com.livefyre.comments.LFUtils;
@@ -34,7 +30,11 @@ import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Attachments;
 import com.livefyre.comments.models.Content;
 import com.livefyre.comments.models.Vote;
-import com.livefyre.comments.ContentHandler;
+import com.livefyre.streamhub_android_sdk.LFSActions;
+import com.livefyre.streamhub_android_sdk.LFSConstants;
+import com.livefyre.streamhub_android_sdk.LFSFlag;
+import com.livefyre.streamhub_android_sdk.WriteClient;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.otto.Bus;
@@ -62,6 +62,7 @@ public class CommentActivity extends BaseActivity {
     private String contentId;
     Content comment;
     Bus mBus = application.getBus();
+    private LinearLayout activityIconLL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -673,14 +674,14 @@ public class CommentActivity extends BaseActivity {
         imageAttachedToCommentIv = (ImageView) findViewById(R.id.imageAttachedToCommentIv);
         webview = (WebView) findViewById(R.id.videoPlayer);
         moreIv = (ImageView) findViewById(R.id.moreIv);
-        LinearLayout activityIconLL = (LinearLayout) findViewById(R.id.activityIconLL);
-        activityIconLL.setOnClickListener(homeIconListener);
+        activityIconLL = (LinearLayout) findViewById(R.id.activityIconLL);
     }
 
     private void setListenersToViews() {
         newReplyLL.setOnClickListener(newReplyLLListener);
         moreIv.setOnClickListener(moreListener);
         likeLL.setOnClickListener(likeListener);
+        activityIconLL.setOnClickListener(homeIconListener);
     }
 
     private void buildToolBar() {
