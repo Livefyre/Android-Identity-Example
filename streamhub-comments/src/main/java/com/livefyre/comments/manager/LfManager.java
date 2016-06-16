@@ -19,8 +19,4 @@ public class LfManager {
     public Bus getBus() {
         return bus;
     }
-
-    public void setBus(Bus bus) {
-        this.bus = bus;
-    }
 }
