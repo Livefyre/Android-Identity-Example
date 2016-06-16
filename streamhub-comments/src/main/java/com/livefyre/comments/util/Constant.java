@@ -1,6 +1,6 @@
-package com.livefyre.comments;
+package com.livefyre.comments.util;
 
-public class LFSAppConstants {
+public class Constant {
 
     public static final String SHARED_PREFERENCES="livefyre_comments";
     public static String ID = "id";

@@ -19,13 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.livefyre.comments.BaseActivity;
-import com.livefyre.comments.ContentHandler;
-import com.livefyre.comments.LFSAppConstants;
-import com.livefyre.comments.LFSConfig;
-import com.livefyre.comments.LFUtils;
+import com.livefyre.comments.manager.ContentHandler;
+import com.livefyre.comments.util.Constant;
+import com.livefyre.comments.Config;
+import com.livefyre.comments.util.Util;
 import com.livefyre.comments.R;
-import com.livefyre.comments.RoundedTransformation;
+import com.livefyre.comments.util.RoundedTransformation;
 import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Attachments;
@@ -93,10 +92,10 @@ public class CommentActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
 
-            if (!comment.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""))) {
+            if (!comment.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(Constant.ID, ""))) {
                 showProgressDialog();
 
-                int HFVal = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""),ContentHandler.ContentMap.get(contentId).getVote());
+                int HFVal = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(Constant.ID, ""),ContentHandler.ContentMap.get(contentId).getVote());
 
                 if (HFVal == 1) {
                     RequestParams parameters = new RequestParams();
@@ -105,7 +104,7 @@ public class CommentActivity extends BaseActivity {
                             SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                     parameters.put("message_id", ContentHandler.ContentMap.get(contentId).getId());
 
-                    WriteClient.postAction(LFSConfig.COLLECTION_ID, ContentHandler.ContentMap.get(contentId).getId(),
+                    WriteClient.postAction(Config.COLLECTION_ID, ContentHandler.ContentMap.get(contentId).getId(),
                             SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSActions.VOTE, parameters,
                             new helpfulCallback());
                 } else {
@@ -114,7 +113,7 @@ public class CommentActivity extends BaseActivity {
                     parameters.put(LFSConstants.LFSPostUserTokenKey,
                             SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                     parameters.put("message_id", ContentHandler.ContentMap.get(contentId).getId());
-                    WriteClient.postAction(LFSConfig.COLLECTION_ID, ContentHandler.ContentMap.get(contentId).getId(),
+                    WriteClient.postAction(Config.COLLECTION_ID, ContentHandler.ContentMap.get(contentId).getId(),
                             SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSActions.VOTE, parameters,
                             new helpfulCallback());
 
@@ -177,13 +176,13 @@ public class CommentActivity extends BaseActivity {
 
         View moreLine = dialog.findViewById(R.id.moreLine);
 
-        if ("yes".equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ISMOD, "")) && mBean.getIsModerator().equals("true")) {
+        if ("yes".equals(SharedPreferenceManager.getInstance().getString(Constant.ISMOD, "")) && mBean.getIsModerator().equals("true")) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
             feature.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
 
-        } else if ("yes".equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ISMOD, ""))) {
+        } else if ("yes".equals(SharedPreferenceManager.getInstance().getString(Constant.ISMOD, ""))) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
@@ -193,7 +192,7 @@ public class CommentActivity extends BaseActivity {
             banUser.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
 
-        } else if (mBean.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""))) {
+        } else if (mBean.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(Constant.ID, ""))) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
         } else {
@@ -209,8 +208,8 @@ public class CommentActivity extends BaseActivity {
             public void onClick(View v) {
                 Intent replyView = new Intent(CommentActivity.this, NewActivity.class);
                 replyView.putExtra("id", id);
-                replyView.putExtra(LFSAppConstants.BODY, ContentHandler.ContentMap.get(contentId).getBodyHtml());
-                replyView.putExtra(LFSAppConstants.PURPOSE, LFSAppConstants.EDIT);
+                replyView.putExtra(Constant.BODY, ContentHandler.ContentMap.get(contentId).getBodyHtml());
+                replyView.putExtra(Constant.PURPOSE, Constant.EDIT);
                 replyView.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(replyView);
                 dialog.dismiss();
@@ -225,7 +224,7 @@ public class CommentActivity extends BaseActivity {
                 showProgressDialog();
                 if (isFeatured) {
                     try {
-                        WriteClient.featureMessage("unfeature", id, LFSConfig.COLLECTION_ID, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
+                        WriteClient.featureMessage("unfeature", id, Config.COLLECTION_ID, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
                                 null, new helpfulCallback());// same as helpful
                         // call back
                     } catch (MalformedURLException e) {
@@ -234,7 +233,7 @@ public class CommentActivity extends BaseActivity {
                 } else {
                     try {
                         WriteClient.featureMessage("feature", id,
-                                LFSConfig.COLLECTION_ID, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
+                                Config.COLLECTION_ID, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
                                 null, new helpfulCallback());// same as helpful
                         // call back
                     } catch (MalformedURLException e) {
@@ -265,7 +264,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.postAction(LFSConfig.COLLECTION_ID, id,
+                WriteClient.postAction(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSActions.BOZO, parameters,
                         new actionCallback());
                 dialog.dismiss();
@@ -278,7 +277,7 @@ public class CommentActivity extends BaseActivity {
             public void onClick(View v) {
                 showProgressDialog();
                 RequestParams parameters = new RequestParams();
-                parameters.put("network", LFSConfig.NETWORK_ID);
+                parameters.put("network", Config.NETWORK_ID);
                 parameters.put(LFSConstants.LFSPostUserTokenKey,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("retroactive", "0");
@@ -302,7 +301,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.postAction(LFSConfig.COLLECTION_ID, id,
+                WriteClient.postAction(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSActions.DELETE, parameters,
                         new actionCallback());
 
@@ -357,7 +356,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.flagContent(LFSConfig.COLLECTION_ID, id,
+                WriteClient.flagContent(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSFlag.SPAM, parameters,
                         new flagCallback());
                 dialog.dismiss();
@@ -376,7 +375,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.flagContent(LFSConfig.COLLECTION_ID, id,
+                WriteClient.flagContent(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSFlag.OFFENSIVE, parameters,
                         new flagCallback());
                 dialog.dismiss();
@@ -395,7 +394,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.flagContent(LFSConfig.COLLECTION_ID, id,
+                WriteClient.flagContent(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSFlag.OFF_TOPIC, parameters,
                         new flagCallback());
                 dialog.dismiss();
@@ -414,7 +413,7 @@ public class CommentActivity extends BaseActivity {
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""));
                 parameters.put("message_id", id);
 
-                WriteClient.flagContent(LFSConfig.COLLECTION_ID, id,
+                WriteClient.flagContent(Config.COLLECTION_ID, id,
                         SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""), LFSFlag.DISAGREE, parameters,
                         new flagCallback());
                 dialog.dismiss();
@@ -437,8 +436,8 @@ public class CommentActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(CommentActivity.this, NewActivity.class);
-            intent.putExtra(LFSAppConstants.PURPOSE, LFSAppConstants.NEW_REPLY);
-            intent.putExtra(LFSAppConstants.ID, ContentHandler.ContentMap.get(contentId).getId());
+            intent.putExtra(Constant.PURPOSE, Constant.NEW_REPLY);
+            intent.putExtra(Constant.ID, ContentHandler.ContentMap.get(contentId).getId());
             startActivity(intent);
         }
     };
@@ -542,10 +541,10 @@ public class CommentActivity extends BaseActivity {
             //Author Name
             authorNameTv.setText(comment.getAuthor().getDisplayName());
             //Posted Date
-            postedDateOrTime.setText(LFUtils.getFormatedDate(
-                    comment.getCreatedAt(), LFSAppConstants.SHART));
+            postedDateOrTime.setText(Util.getFormatedDate(
+                    comment.getCreatedAt(), Constant.SHART));
             //Comment Body
-            commentBody.setText(LFUtils.trimTrailingWhitespace(Html
+            commentBody.setText(Util.trimTrailingWhitespace(Html
                             .fromHtml(comment.getBodyHtml())),
                     TextView.BufferType.SPANNABLE);
             Picasso.with(getApplicationContext()).load(comment.getAuthor().getAvatar()).fit().transform(new RoundedTransformation(90, 0)).into(avatarIv);
@@ -571,7 +570,7 @@ public class CommentActivity extends BaseActivity {
                                 if (mAttachments.getProvider_name().equals("YouTube")) {
                                     int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
                                     webview.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-                                    String youtubeId = LFUtils.getYoutubeVideoId(mAttachments.getUrl());
+                                    String youtubeId = Util.getYoutubeVideoId(mAttachments.getUrl());
                                     webview.loadUrl("http://www.youtube.com/embed/" + youtubeId);
                                 } else {
                                     webview.loadDataWithBaseURL(mAttachments.getLink(), mAttachments.getHTML(), "text/html", "UTF-8", "");
@@ -599,7 +598,7 @@ public class CommentActivity extends BaseActivity {
                 if (comment.getVote().size() > 0) {
                     int helpfulFlag = 0;
 
-                    helpfulFlag = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""),comment.getVote());
+                    helpfulFlag = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(Constant.ID, ""),comment.getVote());
 
                     if (helpfulFlag == 1) {
                         likeIv
@@ -636,14 +635,14 @@ public class CommentActivity extends BaseActivity {
             }
 
             likesFullTv.setVisibility(View.VISIBLE);
-            likesFullTv.setText(LFUtils.getFormatedDate(
-                    comment.getCreatedAt(), LFSAppConstants.DETAIL));
+            likesFullTv.setText(Util.getFormatedDate(
+                    comment.getCreatedAt(), Constant.DETAIL));
         }
     }
 
     private void getDataFromIntent() {
         Intent in = getIntent();
-        contentId = in.getStringExtra(LFSAppConstants.ID);
+        contentId = in.getStringExtra(Constant.ID);
     }
 
     private void pullViews() {

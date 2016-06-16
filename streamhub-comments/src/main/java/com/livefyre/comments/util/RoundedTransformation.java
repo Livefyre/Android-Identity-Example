@@ -1,4 +1,4 @@
-package com.livefyre.comments;
+package com.livefyre.comments.util;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapShader;

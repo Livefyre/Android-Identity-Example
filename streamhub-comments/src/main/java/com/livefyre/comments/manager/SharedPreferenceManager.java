@@ -3,7 +3,7 @@ package com.livefyre.comments.manager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.livefyre.comments.LFSAppConstants;
+import com.livefyre.comments.util.Constant;
 
 
 public class SharedPreferenceManager {
@@ -18,7 +18,7 @@ public class SharedPreferenceManager {
     }
 
     public void init(Context context) {
-        sharedPreferences = context.getSharedPreferences(LFSAppConstants.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(Constant.SHARED_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     public void remove(String key) {
