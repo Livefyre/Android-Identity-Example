@@ -17,9 +17,6 @@ public class BaseActivity extends AppCompatActivity {
 
     public static final String TAG = BaseActivity.class.getSimpleName();
 
-    //application object
-    protected LFCApplication application = AppSingleton.getInstance().getApplication();
-
     private AlertDialog alertDialog;
     private ProgressDialog dialog;
 

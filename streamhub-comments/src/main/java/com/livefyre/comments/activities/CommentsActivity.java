@@ -24,6 +24,7 @@ import com.livefyre.comments.LFSConfig;
 import com.livefyre.comments.R;
 import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
+import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
 import com.livefyre.streamhub_android_sdk.AdminClient;
@@ -72,8 +73,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
             super.onSuccess(statusCode, headers, response);
-            application.printLog(false, TAG + "-InitCallback-onSuccess", response.toString());
-
+            Log.d(TAG, "InitCallback-onSuccess: "+response.toString());
             try {
                 String responseString = response.toString();
                 buildCommentList(responseString);
@@ -86,9 +86,8 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
-            application.printLog(true, TAG + "-InitCallback-onFailure", throwable.toString());
+            Log.e(TAG, "InitCallback-onFailure: "+throwable.getLocalizedMessage() );
         }
-
     }
 
     private OnScrollListener onScrollListener = new OnScrollListener() {
@@ -179,7 +178,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     private ContentHandler content;
     private SwipeRefreshLayout swipeView;
     private LinearLayout notification;
-    private Bus mBus = application.getBus();
+    private Bus mBus = LfManager.getInstance().getBus();
     private String adminClintId = "No";
     private static final int DELETED = -1;
     private static final int PARENT = 0;
@@ -272,9 +271,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 commentsLV.setAdapter(mCommentsAdapter);
                 bootstrapClientCall();
 
-                YoYo.with(Techniques.FadeIn)
-                        .duration(700)
-                        .playOn(findViewById(R.id.commentsLV));
+                YoYo.with(Techniques.FadeIn).duration(700).playOn(findViewById(R.id.commentsLV));
             }
         });
         commentsLV.setOnScrollListener(onScrollListener);
@@ -371,24 +368,23 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
             dismissProgressDialog();
             loginTV.setText("Logout");
             JSONObject data;
-            application.printLog(true, TAG + "-AdminCallback-onSuccess", AdminClintJsonResponseObject.toString());
             try {
                 data = AdminClintJsonResponseObject.getJSONObject("data");
 
                 if (!data.isNull("permissions")) {
                     JSONObject permissions = data.getJSONObject("permissions");
                     if (!permissions.isNull("moderator_key"))
-                        application.putDataInSharedPref(LFSAppConstants.ISMOD, "yes");
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "yes");
                     else {
-                        application.putDataInSharedPref(LFSAppConstants.ISMOD, "no");
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
                     }
                 } else {
-                    application.putDataInSharedPref(LFSAppConstants.ISMOD, "no");
+                    SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
                 }
                 if (!data.isNull("profile")) {
                     JSONObject profile = data.getJSONObject("profile");
                     if (!profile.isNull("id")) {
-                        application.putDataInSharedPref(LFSAppConstants.ID, profile.getString("id"));
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ID, profile.getString("id"));
                         adminClintId = profile.getString("id");
                     }
                 }
@@ -400,7 +396,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         @Override
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
-            application.printLog(true, TAG + "-AdminCallback-onFailure", throwable.toString());
+            Log.e(TAG, "AdminCallback - onFailure: " + throwable.toString());
 
         }
 
@@ -408,18 +404,14 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
     void bootstrapClientCall() {
         try {
-            BootstrapClient.getInit(LFSConfig.SITE_ID,
-                    LFSConfig.ARTICLE_ID,
-                    new InitCallback());
-
+            BootstrapClient.getInit(LFSConfig.SITE_ID, LFSConfig.ARTICLE_ID, new InitCallback());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
     }
 
 
-    Boolean isExistComment(String commentId) {
+    private boolean isExistComment(String commentId) {
         for (Content bean : commentsArray) {
             if (bean.getId().equals(commentId))
                 return true;
@@ -457,7 +449,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
 
     public void onDataUpdate(HashSet<String> authorsSet, HashSet<String> statesSet, HashSet<String> annotationsSet, HashSet<String> updates) {
-        application.printLog(true, TAG, "" + statesSet);
         for (String stateBeanId : statesSet) {
             Content stateBean = ContentHandler.ContentMap.get(stateBeanId);
             if (stateBean.getVisibility().equals("1")) {
@@ -484,8 +475,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 }
             } else {
                 if (!content.hasVisibleChildContents(stateBeanId)) {
-                    application.printLog(true, TAG, "Deleted Content");
-
                     for (int i = 0; i < commentsArray.size(); i++) {
                         Content bean = commentsArray.get(i);
                         if (bean.getId().equals(stateBeanId)) {

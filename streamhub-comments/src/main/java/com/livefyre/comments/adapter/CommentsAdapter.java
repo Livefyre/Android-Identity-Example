@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.livefyre.comments.AppSingleton;
 import com.livefyre.comments.LFCApplication;
 import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFUtils;
@@ -29,7 +28,6 @@ import java.util.List;
  * Created by kvanadev5 on 02/02/15.
  */
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyViewHolder> {
-    private LFCApplication application = AppSingleton.getInstance().getApplication();
     private LayoutInflater mLayoutInflater;
     private Context mContext;
     private List<Content> contentArray = null;
@@ -134,7 +132,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                     //Liked
                     if (comment.getVote() != null) {
                         if (comment.getVote().size() > 0) {
-                            application.printLog(false, "vote", contentArray.get(position).getVote().size() + "A");
                             holder.likesTv.setVisibility(View.VISIBLE);
                             holder.likesTv.setText(likedCount(comment.getVote()));
                         } else
