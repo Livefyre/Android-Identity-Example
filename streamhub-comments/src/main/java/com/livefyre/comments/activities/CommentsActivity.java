@@ -19,10 +19,6 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.livefyre.streamhub_android_sdk.AdminClient;
-import com.livefyre.streamhub_android_sdk.BootstrapClient;
-import com.livefyre.streamhub_android_sdk.StreamClient;
-import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
 import com.livefyre.comments.ContentHandler;
 import com.livefyre.comments.LFSAppConstants;
@@ -32,6 +28,10 @@ import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
+import com.livefyre.streamhub_android_sdk.AdminClient;
+import com.livefyre.streamhub_android_sdk.BootstrapClient;
+import com.livefyre.streamhub_android_sdk.StreamClient;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.squareup.otto.Bus;
@@ -506,10 +506,10 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         public void onClick(View v) {
             if (loginTV.getText().equals("Login")) {
                 Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, "qa-ext.livefyre.com");
-                authenticationActivity.putExtra(AuthenticationActivity.NETWORK, "qa-blank.fyre.co");
-                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, "https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co");
-                authenticationActivity.putExtra(AuthenticationActivity.NEXT, "aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s");
+                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
+                authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
+                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
+                authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
                 startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
             } else {
                 SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
