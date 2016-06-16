@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public class BootstrapClient {
     public static final String TAG = BootstrapClient.class.getSimpleName();
+
     /**
      * Performs a network request on a different thread and delivers a message to the callback.
      * A JSON object with the results will be bound to the message.
@@ -25,11 +26,7 @@ public class BootstrapClient {
      * @throws UnsupportedEncodingException
      * @throws MalformedURLException
      */
-    public static void getInit(String siteId,
-                               String articleId,
-                               AsyncHttpResponseHandler handler)
-            throws UnsupportedEncodingException
-    {
+    public static void getInit(String siteId, String articleId, AsyncHttpResponseHandler handler) throws UnsupportedEncodingException {
         getBootstrapPage(siteId, articleId, handler);
     }
 
@@ -39,19 +36,14 @@ public class BootstrapClient {
      *
      * @param siteId    The Id of the article's site.
      * @param articleId The Id of the collection's article.
-     * @param opts Optional parameters to pass in. Currently takes in pageNumber param for bootstrap page number.
+     * @param opts      Optional parameters to pass in. Currently takes in pageNumber param for bootstrap page number.
      * @param handler   Response handler
      * @throws UnsupportedEncodingException
      * @throws MalformedURLException
      */
-    public static void getBootstrapPage(String siteId,
-                               String articleId,
-                               AsyncHttpResponseHandler handler,
-                               Map<String, Object>... opts)
-            throws UnsupportedEncodingException
-    {
+    public static void getBootstrapPage(String siteId, String articleId, AsyncHttpResponseHandler handler, Map<String, Object>... opts) throws UnsupportedEncodingException {
         final String bootstrapEndpoint = generateBootstrapEndpoint(siteId, articleId, opts);
-        Log.d("SDK", "Requesting " + bootstrapEndpoint);
+        Log.d(TAG, "getBootstrapPage: BootstrapEndPoint" + bootstrapEndpoint);
         HttpClient.client.get(bootstrapEndpoint, handler);
     }
 
@@ -64,11 +56,8 @@ public class BootstrapClient {
      * @throws UnsupportedEncodingException
      * @throws MalformedURLException
      */
-    public static String generateInitEndpoint(String siteId,
-                                              String articleId)
-            throws UnsupportedEncodingException
-    {
-        return generateBootstrapEndpoint( siteId, articleId);
+    public static String generateInitEndpoint(String siteId,String articleId)throws UnsupportedEncodingException {
+        return generateBootstrapEndpoint(siteId, articleId);
     }
 
     /**
@@ -76,17 +65,12 @@ public class BootstrapClient {
      *
      * @param siteId    The Id of the article's site.
      * @param articleId The Id of the collection's article.
-     * @param opts Optional parameters to pass in. Currently takes in pageNumber param for Bootstrap page number.
+     * @param opts      Optional parameters to pass in. Currently takes in pageNumber param for Bootstrap page number.
      * @return The init endpoint with the specified parameters.
      * @throws UnsupportedEncodingException
      * @throws MalformedURLException
      */
-    public static String generateBootstrapEndpoint(
-                                              String siteId,
-                                              String articleId,
-                                              Map<String, Object>... opts)
-            throws UnsupportedEncodingException
-    {
+    public static String generateBootstrapEndpoint(String siteId,String articleId,Map<String, Object>... opts)throws UnsupportedEncodingException {
         // Casting
         final String article64 = Helpers.generateBase64String(articleId);
 
@@ -102,13 +86,11 @@ public class BootstrapClient {
 
         if (opts.length <= 0) {
             uriBuilder.appendPath("init");
-        }
-        else {
-            if(opts[0].get("pageNumber") instanceof Integer) {
+        } else {
+            if (opts[0].get("pageNumber") instanceof Integer) {
                 String page = opts[0].get("pageNumber").toString() + ".json";
                 uriBuilder.appendPath(page);
-            }
-            else {
+            } else {
                 throw new IllegalArgumentException("Bootstrap page number must be an Integer");
             }
         }

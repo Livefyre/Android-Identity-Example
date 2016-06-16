@@ -19,22 +19,23 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.livefyre.streamhub_android_sdk.LFSActions;
-import com.livefyre.streamhub_android_sdk.LFSConstants;
-import com.livefyre.streamhub_android_sdk.LFSFlag;
-import com.livefyre.streamhub_android_sdk.WriteClient;
-import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.BaseActivity;
+import com.livefyre.comments.ContentHandler;
 import com.livefyre.comments.LFSAppConstants;
 import com.livefyre.comments.LFSConfig;
 import com.livefyre.comments.LFUtils;
 import com.livefyre.comments.R;
 import com.livefyre.comments.RoundedTransformation;
+import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Attachments;
 import com.livefyre.comments.models.Content;
 import com.livefyre.comments.models.Vote;
-import com.livefyre.comments.ContentHandler;
+import com.livefyre.streamhub_android_sdk.LFSActions;
+import com.livefyre.streamhub_android_sdk.LFSConstants;
+import com.livefyre.streamhub_android_sdk.LFSFlag;
+import com.livefyre.streamhub_android_sdk.WriteClient;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.otto.Bus;
@@ -61,7 +62,8 @@ public class CommentActivity extends BaseActivity {
 
     private String contentId;
     Content comment;
-    Bus mBus = application.getBus();
+    Bus mBus = LfManager.getInstance().getBus();
+    private LinearLayout activityIconLL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +85,6 @@ public class CommentActivity extends BaseActivity {
 
     @Subscribe
     public void getUpdates(HashSet<String> updatesSet) {
-
-        application.printLog(true, TAG, updatesSet + "");
         populateData();
     }
 
@@ -93,15 +93,10 @@ public class CommentActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
 
-            if (!comment.getAuthorId().equals(
-                    application.getDataFromSharedPrefs(LFSAppConstants.ID, ""))) {
+            if (!comment.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""))) {
                 showProgressDialog();
 
-                int HFVal = knowHelpfulValue(
-                        application
-                                .getDataFromSharedPrefs(LFSAppConstants.ID, ""),
-                        ContentHandler.ContentMap.get(contentId).getVote());
-
+                int HFVal = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""),ContentHandler.ContentMap.get(contentId).getVote());
 
                 if (HFVal == 1) {
                     RequestParams parameters = new RequestParams();
@@ -182,13 +177,13 @@ public class CommentActivity extends BaseActivity {
 
         View moreLine = dialog.findViewById(R.id.moreLine);
 
-        if ("yes".equals(application.getDataFromSharedPrefs(LFSAppConstants.ISMOD, "")) && mBean.getIsModerator().equals("true")) {
+        if ("yes".equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ISMOD, "")) && mBean.getIsModerator().equals("true")) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
             feature.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
 
-        } else if ("yes".equals(application.getDataFromSharedPrefs(LFSAppConstants.ISMOD, ""))) {
+        } else if ("yes".equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ISMOD, ""))) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
@@ -198,8 +193,7 @@ public class CommentActivity extends BaseActivity {
             banUser.setVisibility(View.VISIBLE);
             moreLine.setVisibility(View.VISIBLE);
 
-        } else if (mBean.getAuthorId().equals(
-                application.getDataFromSharedPrefs(LFSAppConstants.ID, ""))) {
+        } else if (mBean.getAuthorId().equals(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""))) {
             edit.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
         } else {
@@ -561,7 +555,6 @@ public class CommentActivity extends BaseActivity {
                     if (mAttachments.getType().equals("video")) {
                         if (mAttachments.getThumbnail_url() != null) {
                             if (mAttachments.getThumbnail_url().length() > 0) {
-                                application.printLog(true, "comment.getAttachments()", comment.getAttachments() + " URL");
                                 imageAttachedToCommentIv.setVisibility(View.GONE);
                                 webview.setVisibility(View.VISIBLE);
                                 webview.setWebViewClient(new WebViewClient() {
@@ -590,7 +583,6 @@ public class CommentActivity extends BaseActivity {
                             if (mAttachments.getUrl().length() > 0) {
                                 imageAttachedToCommentIv.setVisibility(View.VISIBLE);
                                 webview.setVisibility(View.GONE);
-                                application.printLog(true, "comment.getAttachments()", comment.getAttachments() + " URL");
                                 Picasso.with(getApplication()).load(mAttachments.getUrl()).fit().into(imageAttachedToCommentIv);
                             }
                         }
@@ -607,10 +599,7 @@ public class CommentActivity extends BaseActivity {
                 if (comment.getVote().size() > 0) {
                     int helpfulFlag = 0;
 
-                    helpfulFlag = knowHelpfulValue(
-                            application
-                                    .getDataFromSharedPrefs(LFSAppConstants.ID, ""),
-                            comment.getVote());
+                    helpfulFlag = knowHelpfulValue(SharedPreferenceManager.getInstance().getString(LFSAppConstants.ID, ""),comment.getVote());
 
                     if (helpfulFlag == 1) {
                         likeIv
@@ -673,14 +662,14 @@ public class CommentActivity extends BaseActivity {
         imageAttachedToCommentIv = (ImageView) findViewById(R.id.imageAttachedToCommentIv);
         webview = (WebView) findViewById(R.id.videoPlayer);
         moreIv = (ImageView) findViewById(R.id.moreIv);
-        LinearLayout activityIconLL = (LinearLayout) findViewById(R.id.activityIconLL);
-        activityIconLL.setOnClickListener(homeIconListener);
+        activityIconLL = (LinearLayout) findViewById(R.id.activityIconLL);
     }
 
     private void setListenersToViews() {
         newReplyLL.setOnClickListener(newReplyLLListener);
         moreIv.setOnClickListener(moreListener);
         likeLL.setOnClickListener(likeListener);
+        activityIconLL.setOnClickListener(homeIconListener);
     }
 
     private void buildToolBar() {

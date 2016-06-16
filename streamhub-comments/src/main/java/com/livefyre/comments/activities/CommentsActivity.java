@@ -24,6 +24,7 @@ import com.livefyre.comments.LFSConfig;
 import com.livefyre.comments.R;
 import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
+import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
 import com.livefyre.streamhub_android_sdk.AdminClient;
@@ -46,10 +47,85 @@ import java.util.HashSet;
 
 import cz.msebera.android.httpclient.Header;
 
-import static android.support.v7.widget.RecyclerView.OnClickListener;
+import static android.view.View.OnClickListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
 
 public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
+    private class AdminCallback extends JsonHttpResponseHandler {
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+            super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+            super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+        }
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject AdminClintJsonResponseObject) {
+            super.onSuccess(statusCode, headers, AdminClintJsonResponseObject);
+            dismissProgressDialog();
+            loginTV.setText("Logout");
+            JSONObject data;
+            try {
+                data = AdminClintJsonResponseObject.getJSONObject("data");
+
+                if (!data.isNull("permissions")) {
+                    JSONObject permissions = data.getJSONObject("permissions");
+                    if (!permissions.isNull("moderator_key"))
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "yes");
+                    else {
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
+                    }
+                } else {
+                    SharedPreferenceManager.getInstance().putString(LFSAppConstants.ISMOD, "no");
+                }
+                if (!data.isNull("profile")) {
+                    JSONObject profile = data.getJSONObject("profile");
+                    if (!profile.isNull("id")) {
+                        SharedPreferenceManager.getInstance().putString(LFSAppConstants.ID, profile.getString("id"));
+                        adminClintId = profile.getString("id");
+                    }
+                }
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            super.onFailure(statusCode, headers, responseString, throwable);
+            Log.e(TAG, "AdminCallback - onFailure: " + throwable.toString());
+
+        }
+
+    }
+
+    private class BootstrapClientCallback extends JsonHttpResponseHandler {
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            super.onSuccess(statusCode, headers, response);
+            Log.d(TAG, "InitCallback-onSuccess: " + response.toString());
+            try {
+                String responseString = response.toString();
+                buildCommentList(responseString);
+                swipeView.setRefreshing(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            super.onFailure(statusCode, headers, responseString, throwable);
+            Log.e(TAG, "InitCallback-onFailure: " + throwable.getLocalizedMessage());
+        }
+    }
+
     private class StreamCallBack extends AsyncHttpResponseHandler {
 
         @Override
@@ -67,30 +143,10 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         }
     }
 
-    private class InitCallback extends JsonHttpResponseHandler {
 
-        @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            super.onSuccess(statusCode, headers, response);
-            application.printLog(false, TAG + "-InitCallback-onSuccess", response.toString());
-
-            try {
-                String responseString = response.toString();
-                buildCommentList(responseString);
-                swipeView.setRefreshing(false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            application.printLog(true, TAG + "-InitCallback-onFailure", throwable.toString());
-        }
-
-    }
-
+    /**
+     * To control (hide and show) create post and tool bar on scroll
+     */
     private OnScrollListener onScrollListener = new OnScrollListener() {
         boolean hideToolBar = false;
 
@@ -145,23 +201,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         }
     };
 
-    private OnClickListener loginListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (loginTV.getText().equals("Login")) {
-                Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-                authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
-                authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
-                authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
-                authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
-                startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
-            } else {
-                SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
-                CookieManager.getInstance().removeAllCookie();
-                loginTV.setText("Login");
-            }
-        }
-    };
     private DialogInterface.OnClickListener tryAgain = new DialogInterface.OnClickListener() {
 
         @Override
@@ -179,11 +218,8 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     private ContentHandler content;
     private SwipeRefreshLayout swipeView;
     private LinearLayout notification;
-    private Bus mBus = application.getBus();
+    private Bus mBus = LfManager.getInstance().getBus();
     private String adminClintId = "No";
-    private static final int DELETED = -1;
-    private static final int PARENT = 0;
-    private static final int CHILD = 1;
     ArrayList<String> newComments;
 
     @Override
@@ -249,6 +285,20 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 }
                 newComments.clear();
                 break;
+            case R.id.login_TV:
+                if (loginTV.getText().equals("Login")) {
+                    Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
+                    authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, LFSConfig.ENVIRONMENT);
+                    authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, LFSConfig.NETWORK_ID);
+                    authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, LFSConfig.ENCODED_URL);
+                    authenticationActivity.putExtra(AuthenticationActivity.NEXT, LFSConfig.NEXT);
+                    startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+                } else {
+                    SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
+                    CookieManager.getInstance().removeAllCookie();
+                    loginTV.setText("Login");
+                }
+                break;
         }
     }
 
@@ -258,206 +308,8 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
             Picasso.with(getBaseContext()).load(imageURL);
     }
 
-    private void setListenersToViews() {
-        postNewCommentIv.setOnClickListener(this);
-        notification.setOnClickListener(this);
-        swipeView.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
-        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeView.setRefreshing(true);
-                mCommentsAdapter = null;
-                commentsArray.clear();
-                mCommentsAdapter = new CommentsAdapter(getApplication(), commentsArray);
-                commentsLV.setAdapter(mCommentsAdapter);
-                bootstrapClientCall();
-
-                YoYo.with(Techniques.FadeIn)
-                        .duration(700)
-                        .playOn(findViewById(R.id.commentsLV));
-            }
-        });
-        commentsLV.setOnScrollListener(onScrollListener);
-    }
-
-    private void scrollToComment(String mCommentBeanId) {
-        for (int i = 0; i < commentsArray.size(); i++) {
-            Content mBean = commentsArray.get(i);
-            if (mBean.getId().equals(mCommentBeanId)) {
-                commentsLV.smoothScrollToPosition(i);
-                break;
-            }
-        }
-    }
-
-    private void buildToolBar() {
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar
-        setSupportActionBar(toolbar);
-        //disable title on toolbar
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-//        ImageView homeIcon = (ImageView) findViewById(R.id.activityIcon);
-//        homeIcon.setBackgroundResource(R.drawable.flame);
-
-        activityTitle = (TextView) findViewById(R.id.title_TV);
-        activityTitle.setOnClickListener(activityTitleListenerHide);
-
-        loginTV = (TextView) findViewById(R.id.login_TV);
-        loginTV.setOnClickListener(loginListener);
-
-        String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
-
-        if (token == null || token.equals("")) {
-            loginTV.setText("Login");
-        } else {
-            loginTV.setText("Logout");
-        }
-
-    }
-
-    private void pullViews() {
-        commentsLV = (RecyclerView) findViewById(R.id.commentsLV);
-        commentsLV.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        postNewCommentIv = (ImageButton) findViewById(R.id.postNewCommentIv);
-        notifMsgTV = (TextView) findViewById(R.id.notifMsgTV);
-        notification = (LinearLayout) findViewById(R.id.notification);
-        swipeView = (SwipeRefreshLayout) findViewById(R.id.swipe);
-
-    }
-
-    void adminClintCall() {
-        if (!isNetworkAvailable()) {
-            showAlert("No connection available", "TRY AGAIN", tryAgain);
-            return;
-        } else {
-//            showProgressDialog();
-        }
-
-        String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
-
-        if (token == null || token.equals("")) {
-            showToast("Not logged in");
-            return;
-        }
-
-        try {
-            AdminClient.authenticateUser(token,
-                    LFSConfig.COLLECTION_ID, LFSConfig.ARTICLE_ID,
-                    LFSConfig.SITE_ID,
-                    new AdminCallback());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public class AdminCallback extends JsonHttpResponseHandler {
-        @Override
-        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-            super.onFailure(statusCode, headers, throwable, errorResponse);
-            dismissProgressDialog();
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-            super.onFailure(statusCode, headers, throwable, errorResponse);
-            dismissProgressDialog();
-        }
-
-        @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject AdminClintJsonResponseObject) {
-            super.onSuccess(statusCode, headers, AdminClintJsonResponseObject);
-            dismissProgressDialog();
-            loginTV.setText("Logout");
-            JSONObject data;
-            application.printLog(true, TAG + "-AdminCallback-onSuccess", AdminClintJsonResponseObject.toString());
-            try {
-                data = AdminClintJsonResponseObject.getJSONObject("data");
-
-                if (!data.isNull("permissions")) {
-                    JSONObject permissions = data.getJSONObject("permissions");
-                    if (!permissions.isNull("moderator_key"))
-                        application.putDataInSharedPref(LFSAppConstants.ISMOD, "yes");
-                    else {
-                        application.putDataInSharedPref(LFSAppConstants.ISMOD, "no");
-                    }
-                } else {
-                    application.putDataInSharedPref(LFSAppConstants.ISMOD, "no");
-                }
-                if (!data.isNull("profile")) {
-                    JSONObject profile = data.getJSONObject("profile");
-                    if (!profile.isNull("id")) {
-                        application.putDataInSharedPref(LFSAppConstants.ID, profile.getString("id"));
-                        adminClintId = profile.getString("id");
-                    }
-                }
-            } catch (JSONException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            application.printLog(true, TAG + "-AdminCallback-onFailure", throwable.toString());
-
-        }
-
-    }
-
-    void bootstrapClientCall() {
-        try {
-            BootstrapClient.getInit(LFSConfig.SITE_ID,
-                    LFSConfig.ARTICLE_ID,
-                    new InitCallback());
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-    Boolean isExistComment(String commentId) {
-        for (Content bean : commentsArray) {
-            if (bean.getId().equals(commentId))
-                return true;
-        }
-        return false;
-    }
-
-
-    void buildCommentList(String data) {
-        try {
-            content = new ContentHandler(new JSONObject(data), getBaseContext());
-            content.getContentFromResponse(this);
-            commentsArray = content.getDeletedObjects();
-            mCommentsAdapter = new CommentsAdapter(this, commentsArray);
-            commentsLV.setAdapter(mCommentsAdapter);
-            streamClintCall();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        newComments = new ArrayList<>();
-        swipeView.setEnabled(true);
-        dismissProgressDialog();
-    }
-
-    void streamClintCall() {
-        try {
-            StreamClient.pollStreamEndpoint(
-                    LFSConfig.COLLECTION_ID,
-                    ContentHandler.lastEvent,
-                    new StreamCallBack());
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-
+    @Override
     public void onDataUpdate(HashSet<String> authorsSet, HashSet<String> statesSet, HashSet<String> annotationsSet, HashSet<String> updates) {
-        application.printLog(true, TAG, "" + statesSet);
         for (String stateBeanId : statesSet) {
             Content stateBean = ContentHandler.ContentMap.get(stateBeanId);
             if (stateBean.getVisibility().equals("1")) {
@@ -484,8 +336,6 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 }
             } else {
                 if (!content.hasVisibleChildContents(stateBeanId)) {
-                    application.printLog(true, TAG, "Deleted Content");
-
                     for (int i = 0; i < commentsArray.size(); i++) {
                         Content bean = commentsArray.get(i);
                         if (bean.getId().equals(stateBeanId)) {
@@ -520,4 +370,143 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
             }
     }
 
+    private void pullViews() {
+        commentsLV = (RecyclerView) findViewById(R.id.commentsLV);
+        commentsLV.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        postNewCommentIv = (ImageButton) findViewById(R.id.postNewCommentIv);
+        notifMsgTV = (TextView) findViewById(R.id.notifMsgTV);
+        notification = (LinearLayout) findViewById(R.id.notification);
+        swipeView = (SwipeRefreshLayout) findViewById(R.id.swipe);
+
+    }
+
+    private void setListenersToViews() {
+        postNewCommentIv.setOnClickListener(this);
+        notification.setOnClickListener(this);
+        commentsLV.setOnScrollListener(onScrollListener);
+
+        swipeView.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
+        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeView.setRefreshing(true);
+                mCommentsAdapter = null;
+                commentsArray.clear();
+                mCommentsAdapter = new CommentsAdapter(getApplication(), commentsArray);
+                commentsLV.setAdapter(mCommentsAdapter);
+                bootstrapClientCall();
+
+                YoYo.with(Techniques.FadeIn).duration(700).playOn(findViewById(R.id.commentsLV));
+            }
+        });
+    }
+
+    private void buildToolBar() {
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //toolbar
+        setSupportActionBar(toolbar);
+        //disable title on toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+//        ImageView homeIcon = (ImageView) findViewById(R.id.activityIcon);
+//        homeIcon.setBackgroundResource(R.drawable.flame);
+
+        activityTitle = (TextView) findViewById(R.id.title_TV);
+        activityTitle.setOnClickListener(activityTitleListenerHide);
+
+        loginTV = (TextView) findViewById(R.id.login_TV);
+        loginTV.setOnClickListener(this);
+
+        String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
+
+        if (token == null || token.equals("")) {
+            loginTV.setText("Login");
+        } else {
+            loginTV.setText("Logout");
+        }
+
+    }
+
+    private void scrollToComment(String mCommentBeanId) {
+        for (int i = 0; i < commentsArray.size(); i++) {
+            Content mBean = commentsArray.get(i);
+            if (mBean.getId().equals(mCommentBeanId)) {
+                commentsLV.smoothScrollToPosition(i);
+                break;
+            }
+        }
+    }
+
+    private void buildCommentList(String data) {
+        try {
+            content = new ContentHandler(new JSONObject(data), getBaseContext());
+            content.getContentFromResponse(this);
+            commentsArray = content.getDeletedObjects();
+            mCommentsAdapter = new CommentsAdapter(this, commentsArray);
+            commentsLV.setAdapter(mCommentsAdapter);
+            streamClintCall();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        newComments = new ArrayList<>();
+        swipeView.setEnabled(true);
+        dismissProgressDialog();
+
+    }
+
+    private boolean isExistComment(String commentId) {
+        for (Content bean : commentsArray) {
+            if (bean.getId().equals(commentId))
+                return true;
+        }
+        return false;
+    }
+
+//================< Calls >
+    /**
+     * Call to get user info
+     */
+    void adminClintCall() {
+        if (!isNetworkAvailable()) {
+            showAlert("No connection available", "TRY AGAIN", tryAgain);
+            return;
+        }
+        String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
+
+        if (token == null || token.equals("")) {
+            showToast("Not logged in");
+            return;
+        }
+
+        try {
+            AdminClient.authenticateUser(
+                    token,
+                    LFSConfig.COLLECTION_ID,
+                    LFSConfig.ARTICLE_ID,
+                    LFSConfig.SITE_ID,
+                    new AdminCallback());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void bootstrapClientCall() {
+        try {
+            BootstrapClient.getInit(LFSConfig.SITE_ID, LFSConfig.ARTICLE_ID, new BootstrapClientCallback());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void streamClintCall() {
+        try {
+            StreamClient.pollStreamEndpoint(
+                    LFSConfig.COLLECTION_ID,
+                    ContentHandler.lastEvent,
+                    new StreamCallBack());
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }
