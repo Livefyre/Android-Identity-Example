@@ -61,7 +61,7 @@ public class ContentHandler {
         addContentsToCollection(parsedArray);
         parentsList = getParentsContentsInOrder(parsedArray);
         getChildContents(parsedArray);
-        getDeletedObjects();
+//        getDeletedObjects();
     }
 
     public ArrayList<Content> processContentArray(JSONArray contentArray) {
