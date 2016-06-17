@@ -141,6 +141,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.MyView
                     if (comment.getAuthor().getAvatar().length() > 0) {
                         Picasso.with(mContext).load(comment.getAuthor().getAvatar()).fit().transform(new RoundedTransformation(90, 0)).into(holder.avatarIv);
                     } else {
+                        Picasso.with(mContext).load(R.drawable.profile_default).fit().transform(new RoundedTransformation(90, 0)).into(holder.avatarIv);
                     }
                     if (comment.getAttachments() != null) {
                         if (comment.getAttachments().size() > 0) {
