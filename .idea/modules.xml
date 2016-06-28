@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/livefyre-android-sdk.iml" filepath="$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/livefyre-android-sdk.iml" />
-      <module fileurl="file://$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/streamhub-android-sdk/streamhub-android-sdk.iml" filepath="$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/streamhub-android-sdk/streamhub-android-sdk.iml" />
-      <module fileurl="file://$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/streamhub-comments/streamhub-comments.iml" filepath="$USER_HOME$/Google Drive/Developer/android/livefyre-hockey/livefyre-android-sdk/streamhub-comments/streamhub-comments.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android-Identity-Example.iml" filepath="$PROJECT_DIR$/Android-Identity-Example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" filepath="$PROJECT_DIR$/streamhub-android-sdk/streamhub-android-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/streamhub-comments/streamhub-comments.iml" filepath="$PROJECT_DIR$/streamhub-comments/streamhub-comments.iml" />
     </modules>
   </component>
 </project>

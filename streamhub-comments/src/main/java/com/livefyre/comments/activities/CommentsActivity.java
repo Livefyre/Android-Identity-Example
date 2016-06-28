@@ -293,7 +293,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                     authenticationActivity.putExtra(AuthenticationActivity.NEXT, Config.NEXT);
                     startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
                 } else {
-                    SharedPreferenceManager.getInstance().remove(AuthenticationActivity.TOKEN);
+                    SharedPreferenceManager.getInstance().clear();
                     CookieManager.getInstance().removeAllCookie();
                     loginTV.setText("Login");
                 }
@@ -470,6 +470,8 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         if (!isNetworkAvailable()) {
             showAlert("No connection available", "TRY AGAIN", tryAgain);
             return;
+        } else {
+            showProgressDialog();
         }
         String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
 
