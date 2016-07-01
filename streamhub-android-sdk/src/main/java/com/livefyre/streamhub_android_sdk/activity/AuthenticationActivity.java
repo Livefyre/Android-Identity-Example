@@ -22,6 +22,9 @@ public class AuthenticationActivity extends BaseActivity {
             if (url.contains("AuthCanceled")) {
                 cancelResult();
             } else if (cookies != null && cookies.contains("")) {
+                if (url.contains("emailPresent")) {
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+                }
                 getTokenOut(cookies, url);
             } else {
                 webview.loadUrl(url);
