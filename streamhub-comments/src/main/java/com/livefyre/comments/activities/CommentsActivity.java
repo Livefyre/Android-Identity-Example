@@ -490,7 +490,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-    }
+        }
 
     private void bootstrapClientCall() {
         try {

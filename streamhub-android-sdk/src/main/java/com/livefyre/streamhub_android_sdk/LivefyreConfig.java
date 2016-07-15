@@ -7,7 +7,10 @@ public class LivefyreConfig {
 	public static String bootstrapDomain = "bootstrap";
 	public static String quillDomain = "quill";
 	public static String adminDomain = "admin";
+	public static String identityDomain = "identity";
 	public static String streamDomain = "stream1";
+	public static String origin = "http://livefyre-cdn-dev.s3.amazonaws.com";
+	public static String referer = "http://livefyre-cdn-dev.s3.amazonaws.com/demos/lfep2-comments.html";
 //	public static String networkId ="labs.fyre.co";
 	private static String networkID =null;
 
