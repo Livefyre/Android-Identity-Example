@@ -2,23 +2,54 @@ package com.livefyre.streamhub_android_sdk.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.kvana.streamhub_android_sdk.R;
+import com.livefyre.streamhub_android_sdk.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.util.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.util.Util;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+
+import cz.msebera.android.httpclient.Header;
+
+
 public class AuthenticationActivity extends BaseActivity {
+    private class AuthCallback extends JsonHttpResponseHandler {
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            super.onSuccess(statusCode, headers, response);
+            Log.d(TAG, "onSuccess: " + response.toString());
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+            super.onFailure(statusCode, headers, throwable, errorResponse);
+            Log.d(TAG, "onFailure: " + errorResponse.toString());
+
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            super.onFailure(statusCode, headers, responseString, throwable);
+            Log.d(TAG, "onFailure: " + responseString.toString());
+        }
+    }
 
     private class LoginWebViewClient extends WebViewClient {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             String cookies = CookieManager.getInstance().getCookie(URL);
+
             if (url.contains("AuthCanceled")) {
                 cancelResult();
             } else if (cookies != null && cookies.contains("")) {
@@ -125,6 +156,25 @@ public class AuthenticationActivity extends BaseActivity {
             webview.loadUrl(url);
             return;
         }
+
+        try {
+            AuthenticationClient.authenticate(
+                    this,
+                    environment,
+                    LivefyreConfig.origin,
+                    LivefyreConfig.referer,
+                    cookies,
+                    new AuthCallback());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+//        if (url.contains("emailPresent")) {
+//            webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+//            return false;
+//        }
+//
+
         //Process cookie string
         String token = cookies.split(";")[1];
         token = token.replace("\"", "");

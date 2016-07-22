@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 
 /**
  * @author Kvana Dev
- *
  */
 public class AdminClient {
     /**
@@ -31,9 +30,7 @@ public class AdminClient {
                                         String collectionId,
                                         String articleId,
                                         String siteId,
-                                        JsonHttpResponseHandler handler)
-            throws UnsupportedEncodingException
-    {
+                                        JsonHttpResponseHandler handler) throws UnsupportedEncodingException {
         final String authEndpoint =
                 generateAuthEndpoint(userToken, collectionId, articleId, siteId);
         HttpClient.client.get(authEndpoint, handler);
@@ -53,9 +50,7 @@ public class AdminClient {
     public static String generateAuthEndpoint(String userToken,
                                               String collectionId,
                                               String articleId,
-                                              String siteId)
-            throws UnsupportedEncodingException
-    {
+                                              String siteId) throws UnsupportedEncodingException {
         Builder uriBuilder = new Uri.Builder()
                 .scheme(LivefyreConfig.scheme)
                 .authority(LivefyreConfig.adminDomain + "." + LivefyreConfig.getConfiguredNetworkID())
@@ -65,17 +60,15 @@ public class AdminClient {
                 .appendPath("");
 
         if (collectionId != null) {
-            uriBuilder
-                    .appendQueryParameter("collectionId", collectionId)
+            uriBuilder.appendQueryParameter("collectionId", collectionId)
                     .appendQueryParameter("lftoken", userToken);
         } else {
             final String article64 = Helpers.generateBase64String(articleId);
-            uriBuilder
-                    .appendQueryParameter("siteId", siteId)
+            uriBuilder.appendQueryParameter("siteId", siteId)
                     .appendQueryParameter("articleId", article64)
                     .appendQueryParameter("lftoken", userToken);
         }
-        Log.d("Admin URL",""+uriBuilder.toString());
+        Log.d("Admin URL", "" + uriBuilder.toString());
         return uriBuilder.toString();
     }
 }
