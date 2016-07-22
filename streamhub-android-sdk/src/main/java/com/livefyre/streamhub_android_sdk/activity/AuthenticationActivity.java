@@ -10,7 +10,7 @@ import android.webkit.WebViewClient;
 
 import com.kvana.streamhub_android_sdk.R;
 import com.livefyre.streamhub_android_sdk.LivefyreConfig;
-import com.livefyre.streamhub_android_sdk.util.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.util.Util;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -29,6 +29,12 @@ public class AuthenticationActivity extends BaseActivity {
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
             super.onSuccess(statusCode, headers, response);
             Log.d(TAG, "onSuccess: " + response.toString());
+            JSONObject jsonObject = response.optJSONObject("data");
+            String email = jsonObject.optString("email");
+            if (email == null || email.equals("") || email.equals("null")) {
+                webview.setWebViewClient(new OnLoginWebViewClient());
+                webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+            }
         }
 
         @Override
@@ -45,6 +51,13 @@ public class AuthenticationActivity extends BaseActivity {
         }
     }
 
+    private class OnLoginWebViewClient extends WebViewClient {
+
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+            return true;
+        }
+    }
     private class LoginWebViewClient extends WebViewClient {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -169,12 +182,6 @@ public class AuthenticationActivity extends BaseActivity {
             e.printStackTrace();
         }
 
-//        if (url.contains("emailPresent")) {
-//            webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-//            return false;
-//        }
-//
-
         //Process cookie string
         String token = cookies.split(";")[1];
         token = token.replace("\"", "");
@@ -187,7 +194,7 @@ public class AuthenticationActivity extends BaseActivity {
                 return;
             }
             //sending result to requested activity
-            sendResult(jsonObject.optString(TOKEN));
+//            sendResult(token);
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -1,4 +1,4 @@
-package com.livefyre.streamhub_android_sdk.util;
+package com.livefyre.streamhub_android_sdk;
 
 import android.content.Context;
 import android.net.Uri;
@@ -24,7 +24,7 @@ public class AuthenticationClient {
                                     String cookie,
                                     JsonHttpResponseHandler handler) throws UnsupportedEncodingException {
 
-        final String authEndpoint = authEndpoint(environment, origin, referer, cookie);
+        final String authEndpoint = authEndpoint(environment);
 
         Header[] headers = new Header[3];
         headers[0] = new BasicHeader("origin", origin);
@@ -34,10 +34,7 @@ public class AuthenticationClient {
         HttpClient.client.get(context, authEndpoint, headers, null, handler);
     }
 
-    public static String authEndpoint(String environment,
-                                      String origin,
-                                      String referer,
-                                      String cookie) throws UnsupportedEncodingException {
+    public static String authEndpoint(String environment) throws UnsupportedEncodingException {
         Uri.Builder uriBuilder = new Uri.Builder()
                 .scheme(LivefyreConfig.scheme)
                 .authority(LivefyreConfig.identityDomain + "." + environment)
