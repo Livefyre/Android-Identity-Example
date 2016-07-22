@@ -420,6 +420,8 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
         String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
 
         if (token == null || token.equals("")) {
+            SharedPreferenceManager.getInstance().clear();
+            CookieManager.getInstance().removeAllCookie();
             loginTV.setText("Login");
         } else {
             loginTV.setText("Logout");
@@ -463,6 +465,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     }
 
 //================< Calls >
+
     /**
      * Call to get user info
      */
