@@ -32,7 +32,7 @@ public class AuthenticationActivity extends BaseActivity {
 
     private static final String TAG = AuthenticationActivity.class.getName();
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
-    public static String KEY_COOKIE = "lfsp-profile";
+    public static String KEY_COOKIE = "lfsp-profile=";
     public static String TOKEN = "token";
     public static String ENVIRONMENT = "environment";
     public static String NETWORK_ID = "network_id";
@@ -126,7 +126,7 @@ public class AuthenticationActivity extends BaseActivity {
             return;
         }
         //Process cookie string
-        String token = cookies.split(";")[2];
+        String token = cookies.split(";")[1];
         token = token.replace("\"", "");
         token = token.substring(token.indexOf("=") + 1, token.length());
         try {
