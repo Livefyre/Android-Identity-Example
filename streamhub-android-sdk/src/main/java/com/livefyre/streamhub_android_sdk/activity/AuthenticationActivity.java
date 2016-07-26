@@ -9,11 +9,10 @@ import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.livefyre.streamhub_android_sdk.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.util.Util;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -25,7 +24,8 @@ import java.io.UnsupportedEncodingException;
 import cz.msebera.android.httpclient.Header;
 
 
-public class AuthenticationActivity extends BaseActivity {
+public class AuthenticationActivity extends BaseActivity implements View.OnClickListener {
+
     private class AuthCallback extends JsonHttpResponseHandler {
 
         @Override
@@ -44,13 +44,14 @@ public class AuthenticationActivity extends BaseActivity {
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
             Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
-
+            sendResult(token);
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
             Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
+            sendResult(token);
         }
     }
 
@@ -90,6 +91,7 @@ public class AuthenticationActivity extends BaseActivity {
     private Toolbar toolbar;
     private String URL;
     private JSONObject tokenobject;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +136,12 @@ public class AuthenticationActivity extends BaseActivity {
         buildToolBar();
     }
 
+    @Override
+    public void onClick(View view) {
+        if (R.id.cancel_txt == view.getId())
+            finish();
+    }
+
     /**
      * Sends result to requested activity
      *
@@ -175,17 +183,7 @@ public class AuthenticationActivity extends BaseActivity {
         //disable title on toolbar
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        TextView cancel_txt = (TextView) findViewById(R.id.cancel_txt);
-        cancel_txt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (tokenobject != null && !tokenobject.equals("")) {
-                    sendResult(tokenobject.optString(TOKEN));
-                } else {
-                    finish();
-                }
-            }
-        });
+        findViewById(R.id.cancel_txt).setOnClickListener(this);
     }
 
     /**
@@ -215,7 +213,7 @@ public class AuthenticationActivity extends BaseActivity {
         }
 
         //Process cookie string
-        String token = cookies.split(";")[1];
+        token = cookies.split(";")[1];
         token = token.replace("\"", "");
         token = token.substring(token.indexOf("=") + 1, token.length());
         try {
@@ -225,8 +223,6 @@ public class AuthenticationActivity extends BaseActivity {
                 webview.loadUrl(url);
                 return;
             }
-            //sending result to requested activity
-//            sendResult(token);
         } catch (JSONException e) {
             e.printStackTrace();
         }
