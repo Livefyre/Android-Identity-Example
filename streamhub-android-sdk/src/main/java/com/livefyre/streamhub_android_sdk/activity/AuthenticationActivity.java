@@ -43,14 +43,14 @@ public class AuthenticationActivity extends BaseActivity {
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
-            Log.d(TAG, "onFailure: " + errorResponse.toString());
+            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
 
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
-            Log.d(TAG, "onFailure: " + responseString.toString());
+            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
         }
     }
 
