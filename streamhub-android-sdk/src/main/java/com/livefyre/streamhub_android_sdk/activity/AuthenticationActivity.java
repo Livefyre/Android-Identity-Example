@@ -27,7 +27,6 @@ import cz.msebera.android.httpclient.Header;
 public class AuthenticationActivity extends BaseActivity implements View.OnClickListener {
 
     private class AuthCallback extends JsonHttpResponseHandler {
-
         @Override
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
             super.onSuccess(statusCode, headers, response);
@@ -37,6 +36,8 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
             if (email == null || email.equals("") || email.equals("null")) {
                 webview.setWebViewClient(new OnLoginWebViewClient());
                 webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+            }else{
+                sendResult(token);
             }
         }
 
