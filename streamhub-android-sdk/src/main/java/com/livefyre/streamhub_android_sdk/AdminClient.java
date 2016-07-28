@@ -31,8 +31,7 @@ public class AdminClient {
                                         String articleId,
                                         String siteId,
                                         JsonHttpResponseHandler handler) throws UnsupportedEncodingException {
-        final String authEndpoint =
-                generateAuthEndpoint(userToken, collectionId, articleId, siteId);
+        final String authEndpoint =generateAuthEndpoint(userToken, collectionId, articleId, siteId);
         HttpClient.client.get(authEndpoint, handler);
     }
 

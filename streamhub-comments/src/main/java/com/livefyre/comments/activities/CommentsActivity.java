@@ -17,15 +17,15 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.livefyre.comments.manager.ContentHandler;
-import com.livefyre.comments.util.Constant;
 import com.livefyre.comments.Config;
 import com.livefyre.comments.R;
 import com.livefyre.comments.adapter.CommentsAdapter;
 import com.livefyre.comments.listeners.ContentUpdateListener;
+import com.livefyre.comments.manager.ContentHandler;
 import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
+import com.livefyre.comments.util.Constant;
 import com.livefyre.streamhub_android_sdk.AdminClient;
 import com.livefyre.streamhub_android_sdk.BootstrapClient;
 import com.livefyre.streamhub_android_sdk.StreamClient;
@@ -46,11 +46,17 @@ import java.util.HashSet;
 
 import cz.msebera.android.httpclient.Header;
 
-import static android.view.View.OnClickListener;
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
+import static android.view.View.OnClickListener;
 
 public class CommentsActivity extends BaseActivity implements ContentUpdateListener, OnClickListener {
     private class AdminCallback extends JsonHttpResponseHandler {
+        @Override
+        public void onFinish() {
+            super.onFinish();
+            dismissProgressDialog();
+        }
+
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);

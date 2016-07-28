@@ -37,6 +37,8 @@ public class AuthenticationActivity extends BaseActivity {
             if (email == null || email.equals("") || email.equals("null")) {
                 webview.setWebViewClient(new OnLoginWebViewClient());
                 webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+            }else{
+                sendResult(token);
             }
         }
 
@@ -44,6 +46,7 @@ public class AuthenticationActivity extends BaseActivity {
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
             Log.d(TAG, "onFailure: " + errorResponse.toString());
+            cancelResult();
 
         }
 
@@ -51,6 +54,7 @@ public class AuthenticationActivity extends BaseActivity {
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
             Log.d(TAG, "onFailure: " + responseString.toString());
+            cancelResult();
         }
     }
 
@@ -90,7 +94,7 @@ public class AuthenticationActivity extends BaseActivity {
     private Toolbar toolbar;
     private String URL;
     private JSONObject tokenobject;
-
+    private String token;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -215,7 +219,7 @@ public class AuthenticationActivity extends BaseActivity {
         }
 
         //Process cookie string
-        String token = cookies.split(";")[1];
+        token = cookies.split(";")[1];
         token = token.replace("\"", "");
         token = token.substring(token.indexOf("=") + 1, token.length());
         try {
