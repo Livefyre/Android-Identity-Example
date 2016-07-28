@@ -1,7 +1,9 @@
-package com.livefyre.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk.network;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 
 import java.io.IOException;
 import java.io.InputStream;

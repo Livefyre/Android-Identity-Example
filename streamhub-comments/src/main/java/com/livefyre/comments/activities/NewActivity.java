@@ -14,9 +14,9 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.livefyre.streamhub_android_sdk.LFSActions;
-import com.livefyre.streamhub_android_sdk.LFSConstants;
-import com.livefyre.streamhub_android_sdk.WriteClient;
+import com.livefyre.streamhub_android_sdk.util.LFSActions;
+import com.livefyre.streamhub_android_sdk.util.LFSConstants;
+import com.livefyre.streamhub_android_sdk.network.WriteClient;
 import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.comments.util.Constant;
 import com.livefyre.comments.Config;

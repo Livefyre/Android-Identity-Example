@@ -11,8 +11,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.livefyre.streamhub_android_sdk.AuthenticationClient;
-import com.livefyre.streamhub_android_sdk.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.util.Util;
 
 import org.json.JSONException;
