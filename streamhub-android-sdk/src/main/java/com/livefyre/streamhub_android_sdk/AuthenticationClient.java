@@ -7,10 +7,12 @@ import android.util.Log;
 import com.livefyre.streamhub_android_sdk.HttpClient;
 import com.livefyre.streamhub_android_sdk.LivefyreConfig;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.client.params.ClientPNames;
 import cz.msebera.android.httpclient.message.BasicHeader;
 
 /**
@@ -31,7 +33,10 @@ public class AuthenticationClient {
         headers[1] = new BasicHeader("referer", referer);
         headers[2] = new BasicHeader("cookie", cookie);
 
-        HttpClient.client.get(context, authEndpoint, headers, null, handler);
+        RequestParams requestParams=new RequestParams();
+        requestParams.put(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+
+        HttpClient.client.get(context, authEndpoint, headers, requestParams, handler);
     }
 
     public static String authEndpoint(String environment) throws UnsupportedEncodingException {
