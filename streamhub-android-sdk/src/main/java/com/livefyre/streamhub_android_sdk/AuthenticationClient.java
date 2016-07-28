@@ -90,8 +90,6 @@ public class AuthenticationClient {
         }
     }
 
-    private static final String TAG = "AuthenticationClient";
-
     public static void authenticate(String environment, String origin, String referer, String cookie, ResponseHandler handler) throws UnsupportedEncodingException {
         new Task(environment, origin, referer, cookie, handler).execute();
     }
