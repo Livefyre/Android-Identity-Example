@@ -37,7 +37,7 @@ public class AuthenticationClient {
         @Override
         protected String doInBackground(String... strings) {
             StringBuffer responseBuffer = null;
-            InputStream is = null;
+            InputStream is;
             Uri.Builder uriBuilder = new Uri.Builder()
                     .scheme(LivefyreConfig.scheme)
                     .authority(LivefyreConfig.identityDomain + "." + environment)

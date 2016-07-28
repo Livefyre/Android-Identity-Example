@@ -167,11 +167,12 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
     public void onBackPressed() {
         super.onBackPressed();
         //sending cancel info to reqested activity on back pressed
-        if (tokenobject.optString(TOKEN) != null && !tokenobject.optString(TOKEN).equals("")) {
-            sendResult(tokenobject.optString(TOKEN));
-        } else {
-            cancelResult();
-        }
+//        if (tokenobject.optString(TOKEN) != null && !tokenobject.optString(TOKEN).equals("")) {
+//            sendResult(tokenobject.optString(TOKEN));
+//        } else {
+//            cancelResult();
+//        }
+        cancelResult();
     }
 
     private void buildToolBar() {
