@@ -14,47 +14,41 @@ import com.kvana.streamhub_android_sdk.R;
 import com.livefyre.streamhub_android_sdk.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.util.Util;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-import cz.msebera.android.httpclient.Header;
-
 
 public class AuthenticationActivity extends BaseActivity implements View.OnClickListener {
+    private class AuthCallback implements AuthenticationClient.ResponseHandler {
 
-    private class AuthCallback extends JsonHttpResponseHandler {
         @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            super.onSuccess(statusCode, headers, response);
-            Log.d(TAG, "onSuccess: " + response.toString());
-            JSONObject jsonObject = response.optJSONObject("data");
-            String email = jsonObject.optString("email");
-            if (email == null || email.equals("") || email.equals("null")) {
-                webview.setWebViewClient(new OnLoginWebViewClient());
-                webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-            } else {
-                sendResult(token);
+        public void success(String res, String error) {
+            Log.d(TAG, "onSuccess: " + res.toString());
+            try {
+                JSONObject resJsonObj = new JSONObject(res);
+
+                JSONObject jsonObject = resJsonObj.optJSONObject("data");
+                String email = jsonObject.optString("email");
+                if (email == null || email.equals("") || email.equals("null")) {
+                    webview.setWebViewClient(new OnLoginWebViewClient());
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+                } else {
+                    sendResult(token);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-            super.onFailure(statusCode, headers, throwable, errorResponse);
-            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
-            cancelResult();
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
+        public void failure(String msg) {
             cancelResult();
         }
     }
+
 
     private class OnLoginWebViewClient extends WebViewClient {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -201,7 +195,6 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
     public void getTokenOut(String cookies, String url) {
         try {
             AuthenticationClient.authenticate(
-                    this,
                     environment,
                     LivefyreConfig.origin,
                     LivefyreConfig.referer,
