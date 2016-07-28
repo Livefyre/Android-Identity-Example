@@ -36,7 +36,7 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
             if (email == null || email.equals("") || email.equals("null")) {
                 webview.setWebViewClient(new OnLoginWebViewClient());
                 webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-            }else{
+            } else {
                 sendResult(token);
             }
         }
@@ -45,14 +45,14 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
             Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
-            sendResult(token);
+            cancelResult();
         }
 
         @Override
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
             Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
-            sendResult(token);
+            cancelResult();
         }
     }
 
@@ -69,7 +69,7 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
 
             if (url.contains("AuthCanceled")) {
                 cancelResult();
-            } else if (cookies != null && cookies.contains("")) {
+            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE)) {
                 getTokenOut(cookies, url);
 
             } else {
@@ -98,6 +98,9 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
+
+        CookieManager.getInstance().removeAllCookie();
+
         environment = getIntent().getStringExtra(ENVIRONMENT);
         network = getIntent().getStringExtra(NETWORK_ID);
         encodedUrlParamString = getIntent().getStringExtra(ENCODED_URL);
@@ -162,6 +165,7 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
         showToast("Authenticate request cancelled..");
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
+        CookieManager.getInstance().removeAllCookie();
         finish();
     }
 
@@ -195,12 +199,6 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
      * @param url     - redirection Url to reload if cookies not found
      */
     public void getTokenOut(String cookies, String url) {
-        //If requested cookie key not found not process skip processing the string for token
-        if (!cookies.contains(KEY_COOKIE)) {
-            webview.loadUrl(url);
-            return;
-        }
-
         try {
             AuthenticationClient.authenticate(
                     this,
