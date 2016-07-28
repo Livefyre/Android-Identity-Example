@@ -92,6 +92,14 @@ public class AuthenticationClient {
         }
     }
 
+    /**
+     * @param environment
+     * @param origin
+     * @param referer
+     * @param cookie
+     * @param handler
+     * @throws UnsupportedEncodingException
+     */
     public static void authenticate(String environment, String origin, String referer, String cookie, ResponseHandler handler) throws UnsupportedEncodingException {
         new Task(environment, origin, referer, cookie, handler).execute();
     }
