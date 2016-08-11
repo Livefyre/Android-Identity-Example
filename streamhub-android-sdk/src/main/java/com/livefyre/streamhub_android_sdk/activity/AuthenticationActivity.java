@@ -208,6 +208,7 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
         token = token.substring(token.indexOf("=") + 1, token.length());
         try {
             tokenobject = new JSONObject(Util.base64ToString(token));
+            token = tokenobject.optString("token");
             //if token not found just load Url with redirection Url
             if (tokenobject.optString(TOKEN) == null || tokenobject.optString(TOKEN).length() == 0) {
                 webview.loadUrl(url);

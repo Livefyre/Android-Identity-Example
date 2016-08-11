@@ -14,15 +14,15 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.livefyre.streamhub_android_sdk.util.LFSActions;
-import com.livefyre.streamhub_android_sdk.util.LFSConstants;
-import com.livefyre.streamhub_android_sdk.network.WriteClient;
-import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
-import com.livefyre.comments.util.Constant;
 import com.livefyre.comments.Config;
-import com.livefyre.comments.util.Util;
 import com.livefyre.comments.R;
 import com.livefyre.comments.manager.SharedPreferenceManager;
+import com.livefyre.comments.util.Constant;
+import com.livefyre.comments.util.Util;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
+import com.livefyre.streamhub_android_sdk.network.WriteClient;
+import com.livefyre.streamhub_android_sdk.util.LFSActions;
+import com.livefyre.streamhub_android_sdk.util.LFSConstants;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.picasso.Callback;
@@ -217,7 +217,8 @@ public class NewActivity extends BaseActivity {
         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
             super.onFailure(statusCode, headers, responseString, throwable);
             dismissProgressDialog();
-            Log.d("data error", "" + responseString);
+            if (null != responseString)
+                Log.d("data error", "" + responseString);
             try {
                 JSONObject errorJson = new JSONObject(responseString);
                 if (!errorJson.isNull("msg")) {
@@ -407,6 +408,7 @@ public class NewActivity extends BaseActivity {
         @Override
         public void onError() {
             //Hide
+            progressBar.setVisibility(View.GONE);
         }
     }
 }
