@@ -7,7 +7,7 @@ import android.util.Log;
 import com.livefyre.comments.activities.SplashActivity;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.util.Constant;
-import com.livefyre.streamhub_android_sdk.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 
 public class App extends Application {
 

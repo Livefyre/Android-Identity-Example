@@ -9,53 +9,51 @@ import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.livefyre.streamhub_android_sdk.LivefyreConfig;
-import com.livefyre.streamhub_android_sdk.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.util.Util;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-import cz.msebera.android.httpclient.Header;
 
-
-public class AuthenticationActivity extends BaseActivity {
-    private class AuthCallback extends JsonHttpResponseHandler {
+public class AuthenticationActivity extends BaseActivity implements View.OnClickListener {
+    private class AuthCallback implements AuthenticationClient.ResponseHandler {
 
         @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            super.onSuccess(statusCode, headers, response);
-            Log.d(TAG, "onSuccess: " + response.toString());
-            JSONObject jsonObject = response.optJSONObject("data");
-            String email = jsonObject.optString("email");
-            if (email == null || email.equals("") || email.equals("null")) {
-                webview.setWebViewClient(new OnLoginWebViewClient());
-                webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+        public void success(String res, String error) {
+            Log.d(TAG, "onSuccess: " + res.toString());
+            try {
+                JSONObject resJsonObj = new JSONObject(res);
+
+                JSONObject jsonObject = resJsonObj.optJSONObject("data");
+                String email = jsonObject.optString("email");
+                if (email == null || email.equals("") || email.equals("null")) {
+//                    webview.setWebViewClient(new OnLoginWebViewClient());
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, Util.base64ToString(next)));
+                } else {
+                    sendResult(token);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-            super.onFailure(statusCode, headers, throwable, errorResponse);
-            Log.d(TAG, "onFailure: " + errorResponse.toString());
-
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            Log.d(TAG, "onFailure: " + responseString.toString());
+        public void failure(String msg) {
+            sendResult(token);
         }
     }
 
+
     private class OnLoginWebViewClient extends WebViewClient {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.d(TAG, "shouldOverrideUrlLoading: " + url);
+            webview.loadUrl(url);
             return true;
         }
     }
@@ -67,9 +65,8 @@ public class AuthenticationActivity extends BaseActivity {
 
             if (url.contains("AuthCanceled")) {
                 cancelResult();
-            } else if (cookies != null && cookies.contains("")) {
+            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE)) {
                 getTokenOut(cookies, url);
-
             } else {
                 webview.loadUrl(url);
             }
@@ -90,11 +87,15 @@ public class AuthenticationActivity extends BaseActivity {
     private Toolbar toolbar;
     private String URL;
     private JSONObject tokenobject;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
+
+        CookieManager.getInstance().removeAllCookie();
+
         environment = getIntent().getStringExtra(ENVIRONMENT);
         network = getIntent().getStringExtra(NETWORK_ID);
         encodedUrlParamString = getIntent().getStringExtra(ENCODED_URL);
@@ -134,6 +135,15 @@ public class AuthenticationActivity extends BaseActivity {
         buildToolBar();
     }
 
+    @Override
+    public void onClick(View view) {
+        if (R.id.cancel_txt == view.getId())
+            if (null == token || "".equals(token))
+                cancelResult();
+            else
+                sendResult(token);
+    }
+
     /**
      * Sends result to requested activity
      *
@@ -159,12 +169,7 @@ public class AuthenticationActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        //sending cancel info to reqested activity on back pressed
-        if (tokenobject.optString(TOKEN) != null && !tokenobject.optString(TOKEN).equals("")) {
-            sendResult(tokenobject.optString(TOKEN));
-        } else {
-            cancelResult();
-        }
+        cancelResult();
     }
 
     private void buildToolBar() {
@@ -175,17 +180,7 @@ public class AuthenticationActivity extends BaseActivity {
         //disable title on toolbar
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        TextView cancel_txt = (TextView) findViewById(R.id.cancel_txt);
-        cancel_txt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (tokenobject != null && !tokenobject.equals("")) {
-                    sendResult(tokenobject.optString(TOKEN));
-                } else {
-                    finish();
-                }
-            }
-        });
+        findViewById(R.id.cancel_txt).setOnClickListener(this);
     }
 
     /**
@@ -196,15 +191,8 @@ public class AuthenticationActivity extends BaseActivity {
      * @param url     - redirection Url to reload if cookies not found
      */
     public void getTokenOut(String cookies, String url) {
-        //If requested cookie key not found not process skip processing the string for token
-        if (!cookies.contains(KEY_COOKIE)) {
-            webview.loadUrl(url);
-            return;
-        }
-
         try {
             AuthenticationClient.authenticate(
-                    this,
                     environment,
                     LivefyreConfig.origin,
                     LivefyreConfig.referer,
@@ -215,18 +203,16 @@ public class AuthenticationActivity extends BaseActivity {
         }
 
         //Process cookie string
-        String token = cookies.split(";")[1];
+        token = cookies.split(";")[1];
         token = token.replace("\"", "");
         token = token.substring(token.indexOf("=") + 1, token.length());
         try {
             tokenobject = new JSONObject(Util.base64ToString(token));
+            token = tokenobject.optString("token");
             //if token not found just load Url with redirection Url
             if (tokenobject.optString(TOKEN) == null || tokenobject.optString(TOKEN).length() == 0) {
                 webview.loadUrl(url);
-                return;
             }
-            //sending result to requested activity
-//            sendResult(token);
         } catch (JSONException e) {
             e.printStackTrace();
         }

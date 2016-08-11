@@ -1,9 +1,13 @@
-package com.livefyre.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk.network;
 
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.util.Log;
 
+import com.livefyre.streamhub_android_sdk.util.LFSActions;
+import com.livefyre.streamhub_android_sdk.util.LFSConstants;
+import com.livefyre.streamhub_android_sdk.util.LFSFlag;
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
@@ -18,7 +22,7 @@ import java.util.HashMap;
  * @author kvanainc1
  */
 public class WriteClient {
-
+    private static final String TAG = "WriteClient";
     static String[] actions = {"edit", // 0
             "approve", // 1
             "unapprove", // 2
@@ -78,8 +82,7 @@ public class WriteClient {
         if (parameters.containsKey(LFSConstants.LFSPostTypeReview)) {
             JSONObject rating = new JSONObject();
             try {
-                rating.put("default",
-                        parameters.get(LFSConstants.LFSPostTypeReview));
+                rating.put("default", parameters.get(LFSConstants.LFSPostTypeReview));
                 // String rateJson=JSONObject.quote(rating.toString());
                 bodyParams.put("rating", rating.toString());
             } catch (JSONException e) {
@@ -91,25 +94,26 @@ public class WriteClient {
             bodyParams.put("parent_id", parentId);
         }
         if (parameters.containsKey(LFSConstants.LFSPostUserTokenKey))
-            bodyParams.put("lftoken",
-                    (String) parameters.get(LFSConstants.LFSPostUserTokenKey));
+            bodyParams.put("lftoken", (String) parameters.get(LFSConstants.LFSPostUserTokenKey));
         else {
             android.os.Process.killProcess(android.os.Process.myPid());
         }
-        Log.d("", "" + bodyParams);
-        HttpClient.client.post(
-                generateWriteURL(collectionId, userToken, parameters
-                        .get(LFSConstants.LFSPostType).toString()), bodyParams,
+        Log.d(TAG, "postContent-bodyParams: "+bodyParams);
+        HttpClient.client.post(generateWriteURL(
+                collectionId,
+                userToken,
+                parameters.get(LFSConstants.LFSPostType).toString()),
+                bodyParams,
                 handler);
     }
 
     /**
-     * @param collectionId          The Id of the collection.
+     * @param collectionId The Id of the collection.
      * @param contentId
-     * @param token                 The token of the logged in user.
+     * @param token        The token of the logged in user.
      * @param action
      * @param parameters
-     * @param handler               Response handler
+     * @param handler      Response handler
      */
 
     public static void flagContent(String collectionId, String contentId,
@@ -130,13 +134,13 @@ public class WriteClient {
     }
 
     /**
-     * @param collectionId          The Id of the collection.
+     * @param collectionId The Id of the collection.
      * @param contentId
-     * @param token                 The token of the logged in user.
+     * @param token        The token of the logged in user.
      * @param action
      * @param parameters
-     * @param networkID             Livefyre provided network name.
-     * @param handler                Response handler
+     * @param networkID    Livefyre provided network name.
+     * @param handler      Response handler
      */
     public static void flagContent(String collectionId, String contentId,
                                    String token, LFSFlag action, RequestParams parameters,
@@ -156,8 +160,8 @@ public class WriteClient {
     }
 
     /**
-     * @param collectionId      The Id of the collection.
-     * @param userToken         The token of the logged in user.
+     * @param collectionId The Id of the collection.
+     * @param userToken    The token of the logged in user.
      * @param endpoint
      * @return
      * @throws MalformedURLException
@@ -178,11 +182,10 @@ public class WriteClient {
     }
 
     /**
-     *
-     * @param collectionId      The Id of the collection.
-     * @param userToken         The token of the logged in user.
+     * @param collectionId The Id of the collection.
+     * @param userToken    The token of the logged in user.
      * @param endpoint
-     * @param networkID         Livefyre provided network name.
+     * @param networkID    Livefyre provided network name.
      * @return
      * @throws MalformedURLException
      */
@@ -204,10 +207,10 @@ public class WriteClient {
     /**
      * @param action
      * @param contentId
-     * @param collectionId       The Id of the collection.
-     * @param userToken         The token of the logged in user.
+     * @param collectionId The Id of the collection.
+     * @param userToken    The token of the logged in user.
      * @param parameters
-     * @param handler           Response handler
+     * @param handler      Response handler
      * @throws MalformedURLException
      */
 
@@ -231,14 +234,13 @@ public class WriteClient {
     }
 
     /**
-     *
      * @param action
      * @param contentId
-     * @param collectionId       The Id of the collection.
-     * @param userToken         The token of the logged in user.
+     * @param collectionId The Id of the collection.
+     * @param userToken    The token of the logged in user.
      * @param parameters
-     * @param networkID     Livefyre provided network name
-     * @param handler       Response handler
+     * @param networkID    Livefyre provided network name
+     * @param handler      Response handler
      * @throws MalformedURLException
      */
     public static void featureMessage(String action, String contentId,
@@ -261,12 +263,12 @@ public class WriteClient {
     }
 
     /**
-     * @param collectionId       The Id of the collection.
+     * @param collectionId The Id of the collection.
      * @param contentId
-     * @param token             The token of the logged in user.
+     * @param token        The token of the logged in user.
      * @param action
      * @param parameters
-     * @param handler           Response handler
+     * @param handler      Response handler
      */
 
     public static void postAction(String collectionId, String contentId,
@@ -287,13 +289,13 @@ public class WriteClient {
     }
 
     /**
-     * @param collectionId     The Id of the collection.
+     * @param collectionId The Id of the collection.
      * @param contentId
-     * @param token            Livefyre Token
+     * @param token        Livefyre Token
      * @param action
      * @param parameters
-     * @param networkID     Livefyre provided network name
-     * @param handler       Response handler
+     * @param networkID    Livefyre provided network name
+     * @param handler      Response handler
      */
 
     public static void postAction(String collectionId, String contentId,
@@ -317,7 +319,7 @@ public class WriteClient {
      * @param authorId   Author of Post
      * @param token      Livefyre Token
      * @param parameters Parameters includes network,
-     * @param handler   Response handler
+     * @param handler    Response handler
      */
 
     public static void flagAuthor(String authorId, String token,
@@ -335,12 +337,11 @@ public class WriteClient {
     }
 
     /**
-     *
-     * @param authorId          Author of Post
-     * @param token             Livefyre Token
+     * @param authorId   Author of Post
+     * @param token      Livefyre Token
      * @param parameters
-     * @param networkID         Livefyre provided network name
-     * @param handler           Response handler
+     * @param networkID  Livefyre provided network name
+     * @param handler    Response handler
      */
     public static void flagAuthor(String authorId, String token,
                                   RequestParams parameters, String networkID, JsonHttpResponseHandler handler) {

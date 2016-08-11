@@ -1,4 +1,4 @@
-package com.livefyre.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk.util;
 
 public enum LFSFlag {
 	SPAM, OFFENSIVE, DISAGREE, OFF_TOPIC;

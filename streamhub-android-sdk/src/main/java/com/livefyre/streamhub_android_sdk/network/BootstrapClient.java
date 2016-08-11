@@ -1,9 +1,11 @@
-package com.livefyre.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk.network;
 
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.util.Log;
 
+import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.util.Helpers;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.io.UnsupportedEncodingException;
