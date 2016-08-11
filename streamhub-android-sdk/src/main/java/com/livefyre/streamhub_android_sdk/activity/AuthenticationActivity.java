@@ -33,8 +33,8 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
                 JSONObject jsonObject = resJsonObj.optJSONObject("data");
                 String email = jsonObject.optString("email");
                 if (email == null || email.equals("") || email.equals("null")) {
-                    webview.setWebViewClient(new OnLoginWebViewClient());
-                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+//                    webview.setWebViewClient(new OnLoginWebViewClient());
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, Util.base64ToString(next)));
                 } else {
                     sendResult(token);
                 }
@@ -45,13 +45,15 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
 
         @Override
         public void failure(String msg) {
-            cancelResult();
+            sendResult(token);
         }
     }
 
 
     private class OnLoginWebViewClient extends WebViewClient {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.d(TAG, "shouldOverrideUrlLoading: " + url);
+            webview.loadUrl(url);
             return true;
         }
     }
@@ -65,7 +67,6 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
                 cancelResult();
             } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE)) {
                 getTokenOut(cookies, url);
-
             } else {
                 webview.loadUrl(url);
             }
@@ -137,7 +138,10 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
     @Override
     public void onClick(View view) {
         if (R.id.cancel_txt == view.getId())
-            finish();
+            if (null == token || "".equals(token))
+                cancelResult();
+            else
+                sendResult(token);
     }
 
     /**
@@ -159,7 +163,6 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
         showToast("Authenticate request cancelled..");
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
-        CookieManager.getInstance().removeAllCookie();
         finish();
     }
 
@@ -208,7 +211,6 @@ public class AuthenticationActivity extends BaseActivity implements View.OnClick
             //if token not found just load Url with redirection Url
             if (tokenobject.optString(TOKEN) == null || tokenobject.optString(TOKEN).length() == 0) {
                 webview.loadUrl(url);
-                return;
             }
         } catch (JSONException e) {
             e.printStackTrace();

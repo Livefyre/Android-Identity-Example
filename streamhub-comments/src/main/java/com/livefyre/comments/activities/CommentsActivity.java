@@ -248,6 +248,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
             if (requestCode == AuthenticationActivity.AUTHENTICATION_REQUEST_CODE) {
                 SharedPreferenceManager.getInstance().putString(AuthenticationActivity.TOKEN, data.getStringExtra(AuthenticationActivity.TOKEN));
                 adminClintCall();
+                loginTV.setText("Logout");
             }
         }
     }
