@@ -33,7 +33,7 @@ import com.livefyre.comments.models.Vote;
 import com.livefyre.streamhub_android_sdk.LFSActions;
 import com.livefyre.streamhub_android_sdk.LFSConstants;
 import com.livefyre.streamhub_android_sdk.LFSFlag;
-import com.livefyre.streamhub_android_sdk.WriteClient;
+import com.livefyre.streamhub_android_sdk.network.WriteClient;
 import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;

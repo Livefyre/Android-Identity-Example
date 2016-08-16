@@ -1,9 +1,14 @@
-package com.livefyre.streamhub_android_sdk;
+package com.livefyre.streamhub_android_sdk.network;
 
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.util.Log;
 
+import com.livefyre.streamhub_android_sdk.LFSActions;
+import com.livefyre.streamhub_android_sdk.LFSConstants;
+import com.livefyre.streamhub_android_sdk.LFSFlag;
+import com.livefyre.streamhub_android_sdk.LivefyreConfig;
+import com.livefyre.streamhub_android_sdk.network.HttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 

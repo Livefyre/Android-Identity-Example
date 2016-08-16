@@ -1,7 +1,6 @@
 package com.livefyre.streamhub_android_sdk.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,50 +14,40 @@ import android.widget.TextView;
 
 import com.kvana.streamhub_android_sdk.R;
 import com.livefyre.streamhub_android_sdk.LivefyreConfig;
-import com.livefyre.streamhub_android_sdk.AuthenticationClient;
+import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.util.Util;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-import cz.msebera.android.httpclient.Header;
-
 
 public class AuthenticationActivity extends BaseActivity {
-    private class AuthCallback extends JsonHttpResponseHandler {
-
+    private class AuthCallback implements AuthenticationClient.ResponseHandler {
         @Override
-        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            super.onSuccess(statusCode, headers, response);
+        public void success(String res, String error) {
             dismissProgressDialog();
-            Log.d(TAG, "onSuccess: " + response.toString());
-            JSONObject jsonObject = response.optJSONObject("data");
-            String email = jsonObject.optString("email");
-            if (email == null || email.equals("") || email.equals("null")) {
-                webview.setWebViewClient(new OnLoginWebViewClient());
-                webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-            } else {
-                respond();
+            Log.d(TAG, "onSuccess: " + res.toString());
+            try {
+                JSONObject resJsonObj = new JSONObject(res);
+
+                JSONObject jsonObject = resJsonObj.optJSONObject("data");
+                String email = jsonObject.optString("email");
+                if (email == null || email.equals("") || email.equals("null")) {
+                    webview.setWebViewClient(new OnLoginWebViewClient());
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+                } else {
+                    respond();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-            super.onFailure(statusCode, headers, throwable, errorResponse);
+        public void failure(String msg) {
             dismissProgressDialog();
-            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
-            respond();
-
-        }
-
-        @Override
-        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-            super.onFailure(statusCode, headers, responseString, throwable);
-            dismissProgressDialog();
-            Log.d(TAG, "onFailure: " + throwable.getLocalizedMessage());
             respond();
         }
     }
@@ -75,7 +64,6 @@ public class AuthenticationActivity extends BaseActivity {
                 try {
                     showProgressDialog();
                     AuthenticationClient.authenticate(
-                            AuthenticationActivity.this,
                             environment,
                             LivefyreConfig.origin,
                             LivefyreConfig.referer,
@@ -84,7 +72,6 @@ public class AuthenticationActivity extends BaseActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                return true;
             }
             return false;
         }
