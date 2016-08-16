@@ -22,7 +22,7 @@ public class App extends Application {
         //create shortcut icon on install and first launch the app only
         boolean isFirstTime = Boolean.parseBoolean(SharedPreferenceManager.getInstance().getString(Constant.IS_FIRST_TIME_STR, Constant.IS_FIRST_TIME));
         if (isFirstTime) {
-            shortcutIcon();
+//            shortcutIcon();
             SharedPreferenceManager.getInstance().putString(Constant.IS_FIRST_TIME_STR, Constant.IS_NOT_FIRST_TIME);
         }
     }
