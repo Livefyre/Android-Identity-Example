@@ -293,12 +293,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
                 break;
             case R.id.login_TV:
                 if (loginTV.getText().equals("Login")) {
-                    Intent authenticationActivity = new Intent(CommentsActivity.this, AuthenticationActivity.class);
-                    authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, Config.ENVIRONMENT);
-                    authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, Config.NETWORK_ID);
-                    authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, Config.ENCODED_URL);
-                    authenticationActivity.putExtra(AuthenticationActivity.NEXT, Config.NEXT);
-                    startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+                    AuthenticationActivity.start(this, Config.ENVIRONMENT, Config.NETWORK_ID, Config.ENCODED_URL, Config.NEXT);
                 } else {
                     SharedPreferenceManager.getInstance().clear();
                     CookieManager.getInstance().removeAllCookie();
@@ -428,7 +423,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
         if (token == null || token.equals("")) {
             SharedPreferenceManager.getInstance().clear();
-            CookieManager.getInstance().removeAllCookie();
+            AuthenticationActivity.logout();
             loginTV.setText("Login");
         } else {
             loginTV.setText("Logout");
