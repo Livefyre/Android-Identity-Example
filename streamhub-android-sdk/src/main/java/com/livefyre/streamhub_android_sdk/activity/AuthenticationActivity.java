@@ -84,10 +84,12 @@ public class AuthenticationActivity extends BaseActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
+                return true;
             }
             return false;
         }
     }
+
     private class OnLoginWebViewClient extends WebViewClient {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             if (!verified && url.contains(Util.base64ToString(next)) && null != getToken() && !"".equals(getToken())) {
@@ -96,6 +98,7 @@ public class AuthenticationActivity extends BaseActivity {
             return false;
         }
     }
+
     private static final String TAG = AuthenticationActivity.class.getName();
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
     public static String KEY_COOKIE = "lfsp-profile=";
