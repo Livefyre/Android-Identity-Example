@@ -213,11 +213,12 @@ public class AuthenticationActivity extends BaseActivity {
 
     /**
      * starts authentication activity
-     * @param activity your activity
-     * @param environment environment
-     * @param networkId networkId
+     *
+     * @param activity              your activity
+     * @param environment           environment
+     * @param networkId             networkId
      * @param encodedUrlParamString encodedUrlParamString
-     * @param next next
+     * @param next                  next
      */
     public static void start(Activity activity, String environment, String networkId, String encodedUrlParamString, String next) {
         Intent authenticationActivity = new Intent(activity, AuthenticationActivity.class);
@@ -227,6 +228,7 @@ public class AuthenticationActivity extends BaseActivity {
         authenticationActivity.putExtra(AuthenticationActivity.NEXT, next);
         activity.startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
     }
+
     /**
      * delete session
      */
@@ -236,6 +238,7 @@ public class AuthenticationActivity extends BaseActivity {
 
     /**
      * get token
+     *
      * @return lf token
      */
     public static String getToken() {
@@ -255,10 +258,10 @@ public class AuthenticationActivity extends BaseActivity {
 
         String inToken = cookies.split(";")[1];
 
-        if(inToken==null)
+        if (inToken == null)
             return "";
 
-        if(inToken.length()<0)
+        if (inToken.length() < 0)
             return "";
 
         inToken = inToken.replace("\"", "");
