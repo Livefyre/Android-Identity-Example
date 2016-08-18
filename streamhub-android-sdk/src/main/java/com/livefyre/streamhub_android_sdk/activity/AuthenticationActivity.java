@@ -230,16 +230,40 @@ public class AuthenticationActivity extends BaseActivity {
     public static String getToken() {
         String token = "";
         String cookies = CookieManager.getInstance().getCookie(URL);
-        //Process cookie string
+
+        if (null == cookies) {
+            return "";
+        }
+
+        if ((!cookies.contains("sessionid")) && (!cookies.contains("lfsp-profile")))
+            return "";
+
+        if (cookies.split(";").length < 2) {
+            return "";
+        }
+
         String inToken = cookies.split(";")[1];
+
+        if(inToken==null)
+            return "";
+
+        if(inToken.length()<0)
+            return "";
+
         inToken = inToken.replace("\"", "");
+
+        if (!inToken.contains("="))
+            return "";
+
         inToken = inToken.substring(inToken.indexOf("=") + 1, inToken.length());
+
         try {
             JSONObject tokenobject = new JSONObject(Util.base64ToString(inToken));
             token = tokenobject.optString("token");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         return token;
     }
 }
