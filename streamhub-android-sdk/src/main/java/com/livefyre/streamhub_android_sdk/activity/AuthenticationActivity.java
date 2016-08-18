@@ -212,7 +212,12 @@ public class AuthenticationActivity extends BaseActivity {
     }
 
     /**
-     * delete session
+     * starts authentication activity
+     * @param activity your activity
+     * @param environment environment
+     * @param networkId networkId
+     * @param encodedUrlParamString encodedUrlParamString
+     * @param next next
      */
     public static void start(Activity activity, String environment, String networkId, String encodedUrlParamString, String next) {
         Intent authenticationActivity = new Intent(activity, AuthenticationActivity.class);
@@ -222,11 +227,17 @@ public class AuthenticationActivity extends BaseActivity {
         authenticationActivity.putExtra(AuthenticationActivity.NEXT, next);
         activity.startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
     }
-
+    /**
+     * delete session
+     */
     public static void logout() {
         CookieManager.getInstance().removeAllCookie();
     }
 
+    /**
+     * get token
+     * @return lf token
+     */
     public static String getToken() {
         String token = "";
         String cookies = CookieManager.getInstance().getCookie(URL);
