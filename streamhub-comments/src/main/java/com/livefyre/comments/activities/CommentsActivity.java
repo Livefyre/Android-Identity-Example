@@ -257,12 +257,18 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.postNewCommentIv:
-                YoYo.with(Techniques.ZoomIn)
-                        .duration(700)
-                        .playOn(findViewById(R.id.notification));
-                Intent intent = new Intent(CommentsActivity.this, NewActivity.class);
-                intent.putExtra(Constant.PURPOSE, Constant.NEW_COMMENT);
-                startActivity(intent);
+                String token = AuthenticationActivity.getToken();
+                if (token == null || token.length() == 0) {
+                    showToast("Please login to post..");
+                    AuthenticationActivity.start(this, Config.ENVIRONMENT, Config.NETWORK_ID, Config.ENCODED_URL, Config.NEXT);
+                } else {
+                    YoYo.with(Techniques.ZoomIn)
+                            .duration(700)
+                            .playOn(findViewById(R.id.notification));
+                    Intent intent = new Intent(CommentsActivity.this, NewActivity.class);
+                    intent.putExtra(Constant.PURPOSE, Constant.NEW_COMMENT);
+                    startActivity(intent);
+                }
                 break;
             case R.id.notification:
                 YoYo.with(Techniques.BounceInUp)

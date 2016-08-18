@@ -35,9 +35,9 @@ public class AuthenticationActivity extends BaseActivity {
                 JSONObject jsonObject = resJsonObj.optJSONObject("data");
                 String email = jsonObject.optString("email");
                 if (email == null || email.equals("") || email.equals("null")) {
-                    webview.setWebViewClient(new OnLoginWebViewClient());
                     webview.setVisibility(View.VISIBLE);
                     webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+                    webview.setWebViewClient(new OnLoginWebViewClient());
                 } else {
                     respond();
                 }
@@ -242,32 +242,28 @@ public class AuthenticationActivity extends BaseActivity {
      * @return lf token
      */
     public static String getToken() {
+        if (null == URL) return "";
+
         String token = "";
         String cookies = CookieManager.getInstance().getCookie(URL);
 
-        if (null == cookies) {
-            return "";
-        }
+        if (null == cookies) return "";
 
         if ((!cookies.contains("sessionid")) && (!cookies.contains("lfsp-profile")))
             return "";
 
-        if (cookies.split(";").length < 2) {
-            return "";
-        }
+        if (cookies.split(";").length < 2) return "";
+
 
         String inToken = cookies.split(";")[1];
 
-        if (inToken == null)
-            return "";
+        if (inToken == null) return "";
 
-        if (inToken.length() < 0)
-            return "";
+        if (inToken.length() < 0) return "";
 
         inToken = inToken.replace("\"", "");
 
-        if (!inToken.contains("="))
-            return "";
+        if (!inToken.contains("=")) return "";
 
         inToken = inToken.substring(inToken.indexOf("=") + 1, inToken.length());
 
