@@ -60,6 +60,7 @@ public class AuthenticationActivity extends BaseActivity {
             if (url.contains("AuthCanceled")) {
                 respond();
             } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
+                Log.d(TAG+authCallCount, "shouldOverrideUrlLoading: "+url);
                 authCallCount++;
                 validateToken(url);
                 try {
@@ -75,6 +76,7 @@ public class AuthenticationActivity extends BaseActivity {
                     e.printStackTrace();
                 }
             } else if (authCallCount > 0 && authCallCompleted) {
+                Log.d(TAG+"authCalCou-authCalComp", "shouldOverrideUrlLoading: "+url);
                 sendResult(getToken());
             }
             return false;
