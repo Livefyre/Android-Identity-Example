@@ -58,7 +58,7 @@ public class AuthenticationActivity extends BaseActivity {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             String cookies = CookieManager.getInstance().getCookie(URL);
             if (url.contains("AuthCanceled")) {
-                cancelResult();
+                respond();
             } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
                 authCallCount++;
                 validateToken(url);
