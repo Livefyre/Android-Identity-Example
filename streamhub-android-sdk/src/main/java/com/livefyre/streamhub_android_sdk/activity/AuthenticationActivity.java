@@ -36,8 +36,8 @@ public class AuthenticationActivity extends BaseActivity {
                 String email = jsonObject.optString("email");
                 if (email == null || email.equals("") || email.equals("null")) {
                     webview.setVisibility(View.VISIBLE);
+                    authCallCompleted = true;
                     webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-                    webview.setWebViewClient(new OnLoginWebViewClient());
                 } else {
                     respond();
                 }
@@ -59,8 +59,8 @@ public class AuthenticationActivity extends BaseActivity {
             String cookies = CookieManager.getInstance().getCookie(URL);
             if (url.contains("AuthCanceled")) {
                 cancelResult();
-            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && verified) {
-                verified = false;
+            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
+                authCallCount++;
                 validateToken(url);
                 try {
                     showProgressDialog();
@@ -74,14 +74,7 @@ public class AuthenticationActivity extends BaseActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            }
-            return false;
-        }
-    }
-
-    private class OnLoginWebViewClient extends WebViewClient {
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (!verified && url.contains(Util.base64ToString(next)) && null != getToken() && !"".equals(getToken())) {
+            } else if (authCallCount > 0 && authCallCompleted) {
                 sendResult(getToken());
             }
             return false;
@@ -100,7 +93,8 @@ public class AuthenticationActivity extends BaseActivity {
     private WebView webview;
     private Toolbar toolbar;
     private static String URL;
-    private boolean verified = true;
+    private boolean authCallCompleted;
+    private int authCallCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
