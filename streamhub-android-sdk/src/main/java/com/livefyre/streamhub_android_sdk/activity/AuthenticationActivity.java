@@ -35,8 +35,8 @@ public class AuthenticationActivity extends BaseActivity {
                 JSONObject jsonObject = resJsonObj.optJSONObject("data");
                 String email = jsonObject.optString("email");
                 if (email == null || email.equals("") || email.equals("null")) {
-                    webview.setWebViewClient(new OnLoginWebViewClient());
                     webview.setVisibility(View.VISIBLE);
+                    authCallCompleted = true;
                     webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
                 } else {
                     respond();
@@ -56,11 +56,12 @@ public class AuthenticationActivity extends BaseActivity {
     private class LoginWebViewClient extends WebViewClient {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.d(TAG, "shouldOverrideUrlLoading: "+url);
             String cookies = CookieManager.getInstance().getCookie(URL);
             if (url.contains("AuthCanceled")) {
-                cancelResult();
-            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && verified) {
-                verified = false;
+                respond();
+            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
+                authCallCount++;
                 validateToken(url);
                 try {
                     showProgressDialog();
@@ -74,14 +75,7 @@ public class AuthenticationActivity extends BaseActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            }
-            return false;
-        }
-    }
-
-    private class OnLoginWebViewClient extends WebViewClient {
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (!verified && url.contains(Util.base64ToString(next)) && null != getToken() && !"".equals(getToken())) {
+            } else if (authCallCount > 0 && authCallCompleted) {
                 sendResult(getToken());
             }
             return false;
@@ -100,7 +94,8 @@ public class AuthenticationActivity extends BaseActivity {
     private WebView webview;
     private Toolbar toolbar;
     private static String URL;
-    private boolean verified = true;
+    private boolean authCallCompleted;
+    private int authCallCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,32 +237,28 @@ public class AuthenticationActivity extends BaseActivity {
      * @return lf token
      */
     public static String getToken() {
+        if (null == URL) return "";
+
         String token = "";
         String cookies = CookieManager.getInstance().getCookie(URL);
 
-        if (null == cookies) {
-            return "";
-        }
+        if (null == cookies) return "";
 
         if ((!cookies.contains("sessionid")) && (!cookies.contains("lfsp-profile")))
             return "";
 
-        if (cookies.split(";").length < 2) {
-            return "";
-        }
+        if (cookies.split(";").length < 2) return "";
+
 
         String inToken = cookies.split(";")[1];
 
-        if (inToken == null)
-            return "";
+        if (inToken == null) return "";
 
-        if (inToken.length() < 0)
-            return "";
+        if (inToken.length() < 0) return "";
 
         inToken = inToken.replace("\"", "");
 
-        if (!inToken.contains("="))
-            return "";
+        if (!inToken.contains("=")) return "";
 
         inToken = inToken.substring(inToken.indexOf("=") + 1, inToken.length());
 
