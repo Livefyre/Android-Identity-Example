@@ -14,13 +14,13 @@ import android.widget.TextView;
 
 import com.kvana.streamhub_android_sdk.R;
 import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
-import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
 import com.livefyre.streamhub_android_sdk.util.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 
 public class AuthenticationActivity extends BaseActivity {
@@ -37,7 +37,7 @@ public class AuthenticationActivity extends BaseActivity {
                 if (email == null || email.equals("") || email.equals("null")) {
                     webview.setVisibility(View.VISIBLE);
                     authCallCompleted = true;
-                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
+                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network,next));
                 } else {
                     respond();
                 }
@@ -57,27 +57,28 @@ public class AuthenticationActivity extends BaseActivity {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading: "+url);
-            String cookies = CookieManager.getInstance().getCookie(URL);
-            if (url.contains("AuthCanceled")) {
-                respond();
-            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
-                authCallCount++;
-                validateToken(url);
-                try {
-                    showProgressDialog();
-                    AuthenticationClient.authenticate(
-                            environment,
-                            LivefyreConfig.origin,
-                            LivefyreConfig.referer,
-                            cookies,
-                            new AuthCallback());
-                    webview.setVisibility(View.GONE);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            } else if (authCallCount > 0 && authCallCompleted) {
-                sendResult(getToken());
-            }
+
+//            String cookies = CookieManager.getInstance().getCookie(URL);
+//            if (url.contains("AuthCanceled")) {
+//                respond();
+//            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
+//                authCallCount++;
+//                validateToken(url);
+//                try {
+//                    showProgressDialog();
+//                    AuthenticationClient.authenticate(
+//                            environment,
+//                            LivefyreConfig.origin,
+//                            LivefyreConfig.referer,
+//                            cookies,
+//                            new AuthCallback());
+//                    webview.setVisibility(View.GONE);
+//                } catch (UnsupportedEncodingException e) {
+//                    e.printStackTrace();
+//                }
+//            } else if (authCallCount > 0 && authCallCompleted) {
+//                sendResult(getToken());
+//            }
             return false;
         }
     }
@@ -107,7 +108,11 @@ public class AuthenticationActivity extends BaseActivity {
         environment = getIntent().getStringExtra(ENVIRONMENT);
         network = getIntent().getStringExtra(NETWORK_ID);
         encodedUrlParamString = getIntent().getStringExtra(ENCODED_URL);
-        next = getIntent().getStringExtra(NEXT);
+        try {
+            next =  URLEncoder.encode(getIntent().getStringExtra(NEXT), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         //validating url params
         if (environment == null || environment.length() == 0) {
