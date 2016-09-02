@@ -13,7 +13,6 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.kvana.streamhub_android_sdk.R;
-import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.util.Util;
 
 import org.json.JSONException;
@@ -24,68 +23,23 @@ import java.net.URLEncoder;
 
 
 public class AuthenticationActivity extends BaseActivity {
-    private class AuthCallback implements AuthenticationClient.ResponseHandler {
-        @Override
-        public void success(String res, String error) {
-            dismissProgressDialog();
-            Log.d(TAG, "onSuccess: " + res.toString());
-            try {
-                JSONObject resJsonObj = new JSONObject(res);
-
-                JSONObject jsonObject = resJsonObj.optJSONObject("data");
-                String email = jsonObject.optString("email");
-                if (email == null || email.equals("") || email.equals("null")) {
-                    webview.setVisibility(View.VISIBLE);
-                    authCallCompleted = true;
-                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network,next));
-                } else {
-                    respond();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void failure(String msg) {
-            dismissProgressDialog();
-            respond();
-        }
-    }
 
     private class LoginWebViewClient extends WebViewClient {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading: "+url);
-
-//            String cookies = CookieManager.getInstance().getCookie(URL);
-//            if (url.contains("AuthCanceled")) {
-//                respond();
-//            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
-//                authCallCount++;
-//                validateToken(url);
-//                try {
-//                    showProgressDialog();
-//                    AuthenticationClient.authenticate(
-//                            environment,
-//                            LivefyreConfig.origin,
-//                            LivefyreConfig.referer,
-//                            cookies,
-//                            new AuthCallback());
-//                    webview.setVisibility(View.GONE);
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                }
-//            } else if (authCallCount > 0 && authCallCompleted) {
-//                sendResult(getToken());
-//            }
+            if (url.contains(next)) {
+                Log.d(TAG, "shouldOverrideUrlLoading: redirected to next url");
+            } else if (url.contains("/auth/complete")) {
+                Log.d(TAG, "shouldOverrideUrlLoading: " + "auth completed");
+                respond();
+            }
             return false;
         }
     }
 
     private static final String TAG = AuthenticationActivity.class.getName();
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
-    public static String KEY_COOKIE = "lfsp-profile=";
     public static String TOKEN = "token";
     public static String ENVIRONMENT = "environment";
     public static String NETWORK_ID = "network_id";
@@ -95,8 +49,6 @@ public class AuthenticationActivity extends BaseActivity {
     private WebView webview;
     private Toolbar toolbar;
     private static String URL;
-    private boolean authCallCompleted;
-    private int authCallCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,15 +151,6 @@ public class AuthenticationActivity extends BaseActivity {
             cancelResult();
         } else {
             sendResult(getToken());
-        }
-    }
-
-    private void validateToken(String url) {
-        String token = getToken();
-        //if token not found just load Url with redirection Url
-        if (token == null || token.length() == 0) {
-            webview.loadUrl(url);
-            return;
         }
     }
 
