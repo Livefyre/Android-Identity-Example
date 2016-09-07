@@ -28,7 +28,9 @@ public class AuthenticationActivity extends BaseActivity {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading: "+url);
-            if (url.contains(next)) {
+            if (url.contains("AuthCanceled")) {
+                respond();
+            } else if (url.contains(next)) {
                 Log.d(TAG, "shouldOverrideUrlLoading: redirected to next url");
             } else if (url.contains("/auth/complete")) {
                 Log.d(TAG, "shouldOverrideUrlLoading: " + "auth completed");
