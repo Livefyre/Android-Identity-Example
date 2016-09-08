@@ -122,22 +122,22 @@ public class AuthenticationActivity extends BaseActivity {
 
         //validating url params
         if (environment == null || environment.length() == 0) {
-            showToast("Environment is empty.");
+            showToast("Environment required.");
             finish();
         }
 
         if (network == null || network.length() == 0) {
-            showToast("Network is empty.");
+            showToast("Network required.");
             finish();
         }
 
         if (encodedUrlParamString == null || encodedUrlParamString.length() == 0) {
-            showToast("Encoded Url is empty.");
+            showToast("Encoded Url required.");
             finish();
         }
 
         if (next == null || next.length() == 0) {
-            showToast("Next is empty.");
+            showToast("Next required.");
             finish();
         }
         //Preparing Url if all params are ok
