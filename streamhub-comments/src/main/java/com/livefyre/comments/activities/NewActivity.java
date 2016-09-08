@@ -150,7 +150,7 @@ public class NewActivity extends BaseActivity {
         try {
             WriteClient.postContent(
                     Config.COLLECTION_ID, null, SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, ""),
-                    parameters, new writeclientCallback());
+                    parameters, new WriteClientCallback());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -191,7 +191,7 @@ public class NewActivity extends BaseActivity {
     //Call backs
 
     //New Comment
-    public class writeclientCallback extends JsonHttpResponseHandler {
+    public class WriteClientCallback extends JsonHttpResponseHandler {
         @Override
         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
             super.onFailure(statusCode, headers, throwable, errorResponse);
