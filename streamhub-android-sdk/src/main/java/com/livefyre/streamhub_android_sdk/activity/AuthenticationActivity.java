@@ -54,7 +54,7 @@ public class AuthenticationActivity extends BaseActivity {
                 respond(token);
             } else if (url.contains(next)) {
                 Log.d(TAG, "shouldOverrideUrlLoading: redirected to next url");
-            } else if (authCallCount == 0 && url.equals("https://identity.qa-ext.livefyre.com/accounts/profile/#")) {
+            } else if (authCallCount == 0 && url.equals("https://identity."+environment+"/accounts/profile/#")) {
                 authCallCount++;
                 try {
                     showProgressDialog();
