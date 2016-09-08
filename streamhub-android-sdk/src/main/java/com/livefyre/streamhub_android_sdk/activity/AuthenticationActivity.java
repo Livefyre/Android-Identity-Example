@@ -15,12 +15,12 @@ import android.widget.TextView;
 import com.kvana.streamhub_android_sdk.R;
 import com.livefyre.streamhub_android_sdk.network.AuthenticationClient;
 import com.livefyre.streamhub_android_sdk.util.LivefyreConfig;
-import com.livefyre.streamhub_android_sdk.util.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 
 public class AuthenticationActivity extends BaseActivity {
@@ -31,16 +31,9 @@ public class AuthenticationActivity extends BaseActivity {
             Log.d(TAG, "onSuccess: " + res.toString());
             try {
                 JSONObject resJsonObj = new JSONObject(res);
-
                 JSONObject jsonObject = resJsonObj.optJSONObject("data");
-                String email = jsonObject.optString("email");
-                if (email == null || email.equals("") || email.equals("null")) {
-                    webview.setVisibility(View.VISIBLE);
-                    authCallCompleted = true;
-                    webview.loadUrl(String.format("https://identity.%s/%s/pages/profile/complete/?next=%s", environment, network, next));
-                } else {
-                    respond();
-                }
+                token = jsonObject.optString("token");
+                respond(token);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -49,7 +42,7 @@ public class AuthenticationActivity extends BaseActivity {
         @Override
         public void failure(String msg) {
             dismissProgressDialog();
-            respond();
+            respond(token);
         }
     }
 
@@ -57,26 +50,24 @@ public class AuthenticationActivity extends BaseActivity {
 
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d(TAG, "shouldOverrideUrlLoading: "+url);
-            String cookies = CookieManager.getInstance().getCookie(URL);
             if (url.contains("AuthCanceled")) {
-                respond();
-            } else if (cookies != null && cookies.contains("") && cookies.contains(KEY_COOKIE) && authCallCount == 0) {
+                respond(token);
+            } else if (url.contains(next)) {
+                Log.d(TAG, "shouldOverrideUrlLoading: redirected to next url");
+            } else if (authCallCount == 0 && url.equals("https://identity.qa-ext.livefyre.com/accounts/profile/#")) {
                 authCallCount++;
-                validateToken(url);
                 try {
                     showProgressDialog();
                     AuthenticationClient.authenticate(
                             environment,
                             LivefyreConfig.origin,
                             LivefyreConfig.referer,
-                            cookies,
+                            CookieManager.getInstance().getCookie(URL),
                             new AuthCallback());
                     webview.setVisibility(View.GONE);
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            } else if (authCallCount > 0 && authCallCompleted) {
-                sendResult(getToken());
             }
             return false;
         }
@@ -84,7 +75,6 @@ public class AuthenticationActivity extends BaseActivity {
 
     private static final String TAG = AuthenticationActivity.class.getName();
     public static final int AUTHENTICATION_REQUEST_CODE = 200;
-    public static String KEY_COOKIE = "lfsp-profile=";
     public static String TOKEN = "token";
     public static String ENVIRONMENT = "environment";
     public static String NETWORK_ID = "network_id";
@@ -94,9 +84,26 @@ public class AuthenticationActivity extends BaseActivity {
     private WebView webview;
     private Toolbar toolbar;
     private static String URL;
-    private boolean authCallCompleted;
     private int authCallCount;
+    private String token;
 
+    /**
+     * starts authentication activity
+     *
+     * @param activity              your activity
+     * @param environment           environment
+     * @param networkId             networkId
+     * @param encodedUrlParamString encodedUrlParamString
+     * @param next                  next
+     */
+    public static void start(Activity activity, String environment, String networkId, String encodedUrlParamString, String next) {
+        Intent authenticationActivity = new Intent(activity, AuthenticationActivity.class);
+        authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, environment);
+        authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, networkId);
+        authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, encodedUrlParamString);
+        authenticationActivity.putExtra(AuthenticationActivity.NEXT, next);
+        activity.startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +114,11 @@ public class AuthenticationActivity extends BaseActivity {
         environment = getIntent().getStringExtra(ENVIRONMENT);
         network = getIntent().getStringExtra(NETWORK_ID);
         encodedUrlParamString = getIntent().getStringExtra(ENCODED_URL);
-        next = getIntent().getStringExtra(NEXT);
+        try {
+            next = URLEncoder.encode(getIntent().getStringExtra(NEXT), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         //validating url params
         if (environment == null || environment.length() == 0) {
@@ -146,7 +157,7 @@ public class AuthenticationActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        respond();
+        respond(token);
     }
 
     private void buildToolBar() {
@@ -161,11 +172,18 @@ public class AuthenticationActivity extends BaseActivity {
             cancel_txt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    respond();
+                    respond(token);
                 }
             });
     }
 
+    private void respond(String token) {
+        if (token == null || token.length() == 0) {
+            cancelResult();
+        } else {
+            sendResult(token);
+        }
+    }
     /**
      * Sends result to requested activity
      *
@@ -186,89 +204,5 @@ public class AuthenticationActivity extends BaseActivity {
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
         finish();
-    }
-
-    private void respond() {
-        String token = getToken();
-        if (token == null || token.length() == 0) {
-            cancelResult();
-        } else {
-            sendResult(getToken());
-        }
-    }
-
-    private void validateToken(String url) {
-        String token = getToken();
-        //if token not found just load Url with redirection Url
-        if (token == null || token.length() == 0) {
-            webview.loadUrl(url);
-            return;
-        }
-    }
-
-    /**
-     * starts authentication activity
-     *
-     * @param activity              your activity
-     * @param environment           environment
-     * @param networkId             networkId
-     * @param encodedUrlParamString encodedUrlParamString
-     * @param next                  next
-     */
-    public static void start(Activity activity, String environment, String networkId, String encodedUrlParamString, String next) {
-        Intent authenticationActivity = new Intent(activity, AuthenticationActivity.class);
-        authenticationActivity.putExtra(AuthenticationActivity.ENVIRONMENT, environment);
-        authenticationActivity.putExtra(AuthenticationActivity.NETWORK_ID, networkId);
-        authenticationActivity.putExtra(AuthenticationActivity.ENCODED_URL, encodedUrlParamString);
-        authenticationActivity.putExtra(AuthenticationActivity.NEXT, next);
-        activity.startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
-    }
-
-    /**
-     * delete session
-     */
-    public static void logout() {
-        CookieManager.getInstance().removeAllCookie();
-    }
-
-    /**
-     * get token
-     *
-     * @return lf token
-     */
-    public static String getToken() {
-        if (null == URL) return "";
-
-        String token = "";
-        String cookies = CookieManager.getInstance().getCookie(URL);
-
-        if (null == cookies) return "";
-
-        if ((!cookies.contains("sessionid")) && (!cookies.contains("lfsp-profile")))
-            return "";
-
-        if (cookies.split(";").length < 2) return "";
-
-
-        String inToken = cookies.split(";")[1];
-
-        if (inToken == null) return "";
-
-        if (inToken.length() < 0) return "";
-
-        inToken = inToken.replace("\"", "");
-
-        if (!inToken.contains("=")) return "";
-
-        inToken = inToken.substring(inToken.indexOf("=") + 1, inToken.length());
-
-        try {
-            JSONObject tokenobject = new JSONObject(Util.base64ToString(inToken));
-            token = tokenobject.optString("token");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return token;
     }
 }
