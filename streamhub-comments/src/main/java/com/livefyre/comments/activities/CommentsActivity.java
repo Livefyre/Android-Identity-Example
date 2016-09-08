@@ -26,10 +26,10 @@ import com.livefyre.comments.manager.LfManager;
 import com.livefyre.comments.manager.SharedPreferenceManager;
 import com.livefyre.comments.models.Content;
 import com.livefyre.comments.util.Constant;
+import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.livefyre.streamhub_android_sdk.network.AdminClient;
 import com.livefyre.streamhub_android_sdk.network.BootstrapClient;
 import com.livefyre.streamhub_android_sdk.network.StreamClient;
-import com.livefyre.streamhub_android_sdk.activity.AuthenticationActivity;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.squareup.otto.Bus;
@@ -257,7 +257,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.postNewCommentIv:
-                String token = AuthenticationActivity.getToken();
+                String token = SharedPreferenceManager.getInstance().getString(AuthenticationActivity.TOKEN, "");
                 if (token == null || token.length() == 0) {
                     showToast("Please login to post..");
                     AuthenticationActivity.start(this, Config.ENVIRONMENT, Config.NETWORK_ID, Config.ENCODED_URL, Config.NEXT);
