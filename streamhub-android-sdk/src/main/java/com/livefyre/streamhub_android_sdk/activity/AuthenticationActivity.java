@@ -104,6 +104,7 @@ public class AuthenticationActivity extends BaseActivity {
         authenticationActivity.putExtra(AuthenticationActivity.NEXT, next);
         activity.startActivityForResult(authenticationActivity, AuthenticationActivity.AUTHENTICATION_REQUEST_CODE);
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,4 +206,9 @@ public class AuthenticationActivity extends BaseActivity {
         setResult(RESULT_CANCELED, intent);
         finish();
     }
+
+    public static void logout() {
+        CookieManager.getInstance().removeAllCookie();
+    }
+
 }

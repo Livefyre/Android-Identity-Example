@@ -429,6 +429,7 @@ public class CommentsActivity extends BaseActivity implements ContentUpdateListe
 
         if (token == null || token.equals("")) {
             SharedPreferenceManager.getInstance().clear();
+            AuthenticationActivity.logout();
             loginTV.setText("Login");
         } else {
             loginTV.setText("Logout");
