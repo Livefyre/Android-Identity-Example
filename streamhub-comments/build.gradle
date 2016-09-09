@@ -8,7 +8,7 @@ android {
         applicationId "com.livefyre.comments"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 3
+        versionCode 13
         versionName "1.0"
     }
     buildTypes {
