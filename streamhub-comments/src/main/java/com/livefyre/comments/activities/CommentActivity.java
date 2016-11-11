@@ -41,6 +41,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
@@ -497,11 +498,36 @@ public class CommentActivity extends BaseActivity {
 
 
     private class helpfulCallback extends JsonHttpResponseHandler {
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+            super.onSuccess(statusCode, headers, response);
+            dismissProgressDialog();
+        }
+
+        @Override
+        public void onSuccess(int statusCode, Header[] headers, String responseString) {
+            super.onSuccess(statusCode, headers, responseString);
+            dismissProgressDialog();
+        }
 
         @Override
         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
             super.onSuccess(statusCode, headers, response);
             dismissProgressDialog();
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+            super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+            showToast("Something went wrong.");
+        }
+
+        @Override
+        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+            super.onFailure(statusCode, headers, throwable, errorResponse);
+            dismissProgressDialog();
+            showToast("Something went wrong.");
         }
 
         @Override
@@ -571,7 +597,7 @@ public class CommentActivity extends BaseActivity {
                                     int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
                                     webview.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
                                     String youtubeId = Util.getYoutubeVideoId(mAttachments.getUrl());
-                                    webview.loadUrl("http://www.youtube.com/embed/" + youtubeId);
+                                    webview.loadUrl("https://www.youtube.com/embed/" + youtubeId);
                                 } else {
                                     webview.loadDataWithBaseURL(mAttachments.getLink(), mAttachments.getHTML(), "text/html", "UTF-8", "");
                                 }

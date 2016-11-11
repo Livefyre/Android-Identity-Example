@@ -10,5 +10,5 @@ public class Config {
     public static String ENVIRONMENT = "qa-ext.livefyre.com";
     public static String ENCODED_URL = "https%3A%2F%2Fidentity.qa-ext.livefyre.com%2Fqa-blank.fyre.co";
     public static String NEXT_BASE_64 = "aHR0cDovL2xpdmVmeXJlLWNkbi1kZXYuczMuYW1hem9uYXdzLmNvbS9kZW1vcy9sZmVwMi1jb21tZW50cy5odG1s";
-    public static String NEXT = "http://livefyre-cdn-dev.s3.amazonaws.com/demos/lfep2-comments.html";
+    public static String NEXT = "https://livefyre-cdn-dev.s3.amazonaws.com/demos/lfep2-comments.html";
 }
